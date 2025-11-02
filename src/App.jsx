@@ -12,6 +12,7 @@ import StepIndicator from './components/StepIndicator';
 import UserCount from './components/UserCount';
 import BeforeAfter from './components/BeforeAfter';
 import AuthModal from './components/AuthModal';
+import LoadingProgress from './components/LoadingProgress';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -353,8 +354,8 @@ export default function ClayApp() {
           </button>
           
           <div className="text-center mb-4 sm:mb-8">
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Paste job description</h2>
-            <p className="text-sm sm:text-base text-gray-600">More detail = better match</p>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Tell us about the job</h2>
+            <p className="text-sm sm:text-base text-gray-600">The more details, the better we can match it! ✨</p>
           </div>
 
           <div className="glass rounded-2xl shadow-xl p-4 sm:p-8 border border-white/50">
@@ -375,13 +376,13 @@ export default function ClayApp() {
             >
               {processing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Optimizing...
+                  <Sparkles className="w-5 h-5 animate-pulse" />
+                  Crafting your resume...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Optimize Resume
+                  Make My Resume Shine ✨
                 </>
               )}
             </button>
@@ -402,14 +403,14 @@ export default function ClayApp() {
         <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-12 pb-12 sm:pb-16">
           <StepIndicator currentStep={3} />
           
-          <div className="text-center mb-6 sm:mb-10">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <div className="text-center mb-6 sm:mb-10">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4 animate-bounce-in">
               <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              Optimization Complete
+              All Done! 🎉
             </div>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Your resume is ready</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Your resume is ready!</h2>
             <p className="text-sm sm:text-lg text-gray-600">
-              <span className="font-semibold text-slate-700">3.2x better</span> chance of landing the interview
+              We've made it <span className="font-semibold text-teal-600">3.2x better</span> at landing interviews
             </p>
           </div>
 
@@ -584,6 +585,9 @@ export default function ClayApp() {
           </div>
         </div>
       )}
+
+      {/* Loading Progress Modal */}
+      <LoadingProgress isVisible={processing} />
 
       {/* Auth Modal */}
       <AuthModal 

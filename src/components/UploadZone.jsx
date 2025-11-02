@@ -18,7 +18,7 @@ export default function UploadZone({ file, uploading, onFileSelect }) {
           {uploading ? (
             <>
               <Loader2 className="w-10 h-10 sm:w-16 sm:h-16 text-slate-600 animate-spin" />
-              <p className="text-xs sm:text-base font-semibold text-gray-900">Processing file...</p>
+              <p className="text-xs sm:text-base font-semibold text-gray-900">Reading your resume...</p>
             </>
           ) : file ? (
             <>

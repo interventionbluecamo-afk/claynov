@@ -165,14 +165,20 @@ export default function ClayApp() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
       {/* Header */}
       <header className="border-b glass sticky top-0 z-50 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-slate-600 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-teal-600 bg-clip-text text-transparent">Clay</span>
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-700 to-teal-600 bg-clip-text text-transparent">Clay</span>
           </div>
-          <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+          <button 
+            onClick={() => {
+              // Placeholder - can add auth later
+              alert('Sign in coming soon! The app works without an account.');
+            }}
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors active:scale-95"
+          >
             Sign In
           </button>
         </div>
@@ -183,42 +189,42 @@ export default function ClayApp() {
 
       {/* Step 1: Upload */}
       {step === 1 && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-16">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-bold mb-6">
-              <Sparkles className="w-4 h-4" />
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 pt-4 sm:pt-16 pb-8 sm:pb-16">
+          <div className="text-center mb-6 sm:mb-12">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs sm:text-sm font-bold mb-4 sm:mb-6">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               100% Free Forever
             </div>
             
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-2 sm:mb-4 leading-tight">
               Land jobs like<br />
               <span className="bg-gradient-to-r from-slate-700 to-teal-600 bg-clip-text text-transparent">never before</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-2">
+            <p className="text-base sm:text-xl text-gray-600 mb-1 sm:mb-2">
               AI tailors your resume in seconds.
             </p>
-            <p className="text-lg font-semibold text-gray-900">3.2x more callbacks</p>
+            <p className="text-base sm:text-lg font-semibold text-gray-900">3.2x more callbacks</p>
           </div>
 
           {/* Social Proof */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12 text-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-12 text-xs sm:text-sm">
             <UserCount count={2341} />
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               {[1,2,3,4,5].map(i => (
-                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
               ))}
-              <span className="text-gray-700 font-medium ml-1">4.9/5</span>
+              <span className="text-gray-700 font-medium ml-0.5 sm:ml-1">4.9/5</span>
             </div>
           </div>
 
           {/* Upload Zone */}
-          <div id="upload-section" className="max-w-xl mx-auto mb-8">
+          <div id="upload-section" className="max-w-xl mx-auto mb-4 sm:mb-8">
             <UploadZone file={resumeFile} uploading={uploading} onFileSelect={handleFileUpload} />
             
             {resumeFile && !uploading && (
               <button 
                 onClick={() => setStep(2)} 
-                className="mt-6 w-full px-8 py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="mt-4 sm:mt-6 w-full px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[48px]"
               >
                 Continue <ArrowRight className="w-5 h-5" />
               </button>
@@ -226,36 +232,36 @@ export default function ClayApp() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-500 mb-16">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500 mb-8 sm:mb-16">
             {[{icon: Check, text: 'Unlimited & Free'}, {icon: Check, text: 'No credit card'}, {icon: Lock, text: 'Private'}].map((item, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <item.icon className="w-4 h-4 text-green-500" />
+              <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                 <span>{item.text}</span>
               </div>
             ))}
           </div>
 
           {/* Features */}
-          <div className="grid sm:grid-cols-3 gap-6 mb-16">
+          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-16">
             {features.map((f, i) => (
-              <div key={i} className="glass rounded-xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-teal-100 rounded-lg flex items-center justify-center mb-4">
-                  <f.icon className="w-6 h-6 text-slate-700" />
+              <div key={i} className="glass rounded-xl p-4 sm:p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all hover:scale-[1.02]">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-slate-100 to-teal-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                  <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-600">{f.desc}</p>
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-1 sm:mb-2">{f.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-600">{f.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Testimonial */}
-          <div className="glass-dark rounded-2xl p-8 text-white text-center shadow-2xl mb-16">
-            <p className="text-base mb-4 opacity-90">"Used Clay. 31 companies. 14 interviews, 3 offers."</p>
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold border border-white/20">ML</div>
+          <div className="glass-dark rounded-2xl p-5 sm:p-8 text-white text-center shadow-2xl mb-8 sm:mb-16">
+            <p className="text-sm sm:text-base mb-3 sm:mb-4 opacity-90">"Used Clay. 31 companies. 14 interviews, 3 offers."</p>
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold text-sm sm:text-base border border-white/20">ML</div>
               <div className="text-left">
-                <p className="font-semibold">Marcus L.</p>
-                <p className="text-sm opacity-80">Designer → Senior PM</p>
+                <p className="font-semibold text-sm sm:text-base">Marcus L.</p>
+                <p className="text-xs sm:text-sm opacity-80">Designer → Senior PM</p>
               </div>
             </div>
           </div>
@@ -267,27 +273,27 @@ export default function ClayApp() {
 
       {/* Step 2: Job Description */}
       {step === 2 && (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16">
+        <div className="max-w-3xl mx-auto px-3 sm:px-6 pt-4 sm:pt-12 pb-12 sm:pb-16">
           <StepIndicator currentStep={2} />
           
           <button 
             onClick={() => setStep(1)} 
-            className="text-sm text-gray-600 hover:text-gray-900 mb-8 flex items-center gap-2 transition-colors"
+            className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 mb-4 sm:mb-8 flex items-center gap-1.5 sm:gap-2 transition-colors active:scale-95 min-h-[44px]"
           >
             ← Back
           </button>
           
-          <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Paste job description</h2>
-            <p className="text-base text-gray-600">More detail = better match</p>
+          <div className="text-center mb-4 sm:mb-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Paste job description</h2>
+            <p className="text-sm sm:text-base text-gray-600">More detail = better match</p>
           </div>
 
-          <div className="glass rounded-2xl shadow-xl p-6 sm:p-8 border border-white/50">
+          <div className="glass rounded-2xl shadow-xl p-4 sm:p-8 border border-white/50">
             <textarea 
               value={jobDesc} 
               onChange={(e) => setJobDesc(e.target.value)} 
               placeholder="Senior Product Manager - 5+ years experience, agile methodology, cross-functional leadership..."
-              className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-200 outline-none resize-none text-base transition-all bg-white/50" 
+              className="w-full h-48 sm:h-64 p-3 sm:p-4 border-2 border-gray-200 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-200 outline-none resize-none text-sm sm:text-base transition-all bg-white/50" 
             />
             <div className="mt-2 text-xs text-gray-500">
               {jobDesc.length > 0 && `${jobDesc.length} characters`}
@@ -296,7 +302,7 @@ export default function ClayApp() {
             <button 
               onClick={handleOptimize} 
               disabled={!jobDesc.trim() || processing || !resumeText} 
-              className="mt-6 w-full px-8 py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="mt-4 sm:mt-6 w-full px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
             >
               {processing ? (
                 <>
@@ -312,11 +318,11 @@ export default function ClayApp() {
             </button>
           </div>
 
-          <div className="mt-8 glass rounded-xl p-4 flex gap-3 border border-teal-100/50">
-            <Lock className="w-6 h-6 text-slate-600 flex-shrink-0" />
+          <div className="mt-4 sm:mt-8 glass rounded-xl p-3 sm:p-4 flex gap-2 sm:gap-3 border border-teal-100/50">
+            <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-slate-600 flex-shrink-0" />
             <div>
-              <h4 className="font-semibold text-slate-900 mb-1">100% Private</h4>
-              <p className="text-sm text-slate-700">Your resume stays on your device. Processing happens securely via Claude API.</p>
+              <h4 className="font-semibold text-sm sm:text-base text-slate-900 mb-0.5 sm:mb-1">100% Private</h4>
+              <p className="text-xs sm:text-sm text-slate-700">Your resume stays on your device. Processing happens securely via Claude API.</p>
             </div>
           </div>
         </div>
@@ -324,33 +330,33 @@ export default function ClayApp() {
 
       {/* Step 3: Results */}
       {step === 3 && result && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-12 pb-12 sm:pb-16">
           <StepIndicator currentStep={3} />
           
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
-              <Check className="w-4 h-4" />
+          <div className="text-center mb-6 sm:mb-10">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+              <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Optimization Complete
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Your resume is ready</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Your resume is ready</h2>
+            <p className="text-sm sm:text-lg text-gray-600">
               <span className="font-semibold text-slate-700">3.2x better</span> chance of landing the interview
             </p>
           </div>
 
           {/* Tone Selector */}
-          <div className="glass rounded-xl p-6 shadow-xl mb-6 border border-white/50">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-slate-700" />
+          <div className="glass rounded-xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6 border border-white/50">
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
               Choose Tone (Free)
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {['Professional', 'Creative', 'Technical', 'Executive'].map(t => (
                 <button 
                   key={t} 
                   onClick={() => handleToneChange(t.toLowerCase())}
                   disabled={processing}
-                  className={`p-4 rounded-lg border-2 transition-all disabled:opacity-50 ${
+                  className={`p-3 sm:p-4 rounded-lg border-2 text-xs sm:text-sm transition-all disabled:opacity-50 min-h-[44px] active:scale-95 ${
                     tone === t.toLowerCase() 
                       ? 'border-slate-600 bg-slate-50 font-semibold shadow-md' 
                       : 'border-gray-200 hover:border-slate-300 hover:shadow-sm'
@@ -363,45 +369,45 @@ export default function ClayApp() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 sm:gap-6 mb-6">
+          <div className="grid grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-6">
             <StatsCard value={result.ats} label="ATS Score" index={0} />
             <StatsCard value={result.match} label="Match Score" index={1} />
             <StatsCard value={result.changes?.length || 0} label="Improvements" index={2} />
           </div>
 
           {/* Results Grid */}
-          <div className="grid sm:grid-cols-2 gap-6 mb-8">
-            <div className="glass rounded-xl p-6 shadow-xl border border-white/50">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-slate-700" />
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="glass rounded-xl p-4 sm:p-6 shadow-xl border border-white/50">
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
                 Key Changes
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2 sm:space-y-3">
                 {result.changes && result.changes.length > 0 ? (
                   result.changes.map((c, i) => (
-                    <li key={i} className="flex gap-3 text-sm">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <li key={i} className="flex gap-2 sm:gap-3 text-xs sm:text-sm">
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{c}</span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-gray-500">No specific changes identified</li>
+                  <li className="text-xs sm:text-sm text-gray-500">No specific changes identified</li>
                 )}
               </ul>
             </div>
 
-            <div className="glass rounded-xl p-6 shadow-xl border border-white/50">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-slate-700" />
+            <div className="glass rounded-xl p-4 sm:p-6 shadow-xl border border-white/50">
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
                 Gap Analysis
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {result.gaps && result.gaps.length > 0 ? (
                   result.gaps.map((g, i) => (
-                    <div key={i} className="border-l-2 border-slate-300 pl-3">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-medium text-sm text-gray-900">{g.skill}</span>
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${
+                    <div key={i} className="border-l-2 border-slate-300 pl-2 sm:pl-3">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                        <span className="font-medium text-xs sm:text-sm text-gray-900">{g.skill}</span>
+                        <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs rounded-full ${
                           g.status === 'present' 
                             ? 'bg-green-100 text-green-700' 
                             : g.status === 'added' 
@@ -411,27 +417,27 @@ export default function ClayApp() {
                           {g.status}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600">{g.recommendation || g.rec}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-600">{g.recommendation || g.rec}</p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">No gaps identified</p>
+                  <p className="text-xs sm:text-sm text-gray-500">No gaps identified</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button 
               onClick={reset} 
-              className="w-full sm:w-auto px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all glass"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-base sm:text-lg hover:bg-gray-50 active:scale-[0.98] transition-all glass min-h-[48px]"
             >
               Optimize Another
             </button>
             <button 
               onClick={handleDownload}
-              className="flex-1 px-8 py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all"
+              className="flex-1 px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-slate-700 to-teal-600 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-xl hover:shadow-teal-500/25 active:scale-[0.98] transition-all min-h-[48px]"
             >
               Download Resume
             </button>
@@ -511,12 +517,12 @@ export default function ClayApp() {
       )}
 
       {/* Footer */}
-      <footer className="border-t mt-20 bg-white/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+      <footer className="border-t mt-12 sm:mt-20 bg-white/50">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
             <p className="text-center sm:text-left">
               Built with Claude AI · Free forever
-              <span className="mx-2">·</span>
+              <span className="mx-1.5 sm:mx-2">·</span>
               <a 
                 href="https://roundtripux.com" 
                 target="_blank" 
@@ -526,10 +532,10 @@ export default function ClayApp() {
                 by RoundTrip UX
               </a>
             </p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-gray-900 transition-colors">Privacy</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Terms</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Contact</a>
+            <div className="flex gap-4 sm:gap-6">
+              <a href="#" className="hover:text-gray-900 transition-colors active:scale-95">Privacy</a>
+              <a href="#" className="hover:text-gray-900 transition-colors active:scale-95">Terms</a>
+              <a href="#" className="hover:text-gray-900 transition-colors active:scale-95">Contact</a>
             </div>
           </div>
         </div>

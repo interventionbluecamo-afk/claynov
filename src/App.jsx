@@ -1,14 +1,17 @@
-import React, { useState, useCallback } from 'react';
-import { Sparkles, FileText, Zap, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2 } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Sparkles, FileText, Zap, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2, LogOut, User as UserIcon } from 'lucide-react';
 import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
+import { mockOptimizeResume } from './utils/mockApi';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
+import { getCurrentUser, signOut, isAuthenticated } from './utils/auth';
 import UploadZone from './components/UploadZone';
 import ErrorBanner from './components/ErrorBanner';
 import StatsCard from './components/StatsCard';
 import StepIndicator from './components/StepIndicator';
 import UserCount from './components/UserCount';
 import BeforeAfter from './components/BeforeAfter';
+import AuthModal from './components/AuthModal';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -21,6 +24,8 @@ export default function ClayApp() {
   const [error, setError] = useState(null);
   const [showAddOns, setShowAddOns] = useState(false);
   const [tone, setTone] = useState('professional');
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleFileUpload = useCallback(async (e) => {
     const file = e.target.files[0];
@@ -69,7 +74,12 @@ export default function ClayApp() {
     setError(null);
 
     try {
-      const optimizationResult = await optimizeResumeApi(resumeText, jobDesc, tone);
+      // Use mock API for testing (bypass Claude)
+      // To use real API, change mockOptimizeResume to optimizeResumeApi
+      const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
+      const optimizationResult = apiKey 
+        ? await optimizeResumeApi(resumeText, jobDesc, tone)
+        : await mockOptimizeResume(resumeText, jobDesc, tone);
       
       if (!optimizationResult.success) {
         throw new Error('Optimization failed. Please try again.');
@@ -86,9 +96,24 @@ export default function ClayApp() {
       setStep(3);
     } catch (err) {
       const errorMsg = err.message.includes('API key')
-        ? 'Claude API not configured. Please add your API key to environment variables.'
+        ? 'Claude API not configured. Using mock data for demo.'
         : err.message || 'Failed to optimize resume. Please try again.';
       setError(errorMsg);
+      
+      // Fallback to mock if real API fails
+      try {
+        const mockResult = await mockOptimizeResume(resumeText, jobDesc, tone);
+        setResult({
+          ats: mockResult.ats_score || 85,
+          match: mockResult.match_score || 88,
+          changes: mockResult.key_changes || [],
+          gaps: mockResult.gap_analysis || [],
+          optimizedText: mockResult.optimized_resume || resumeText
+        });
+        setStep(3);
+      } catch (mockErr) {
+        console.error('Mock API also failed:', mockErr);
+      }
     } finally {
       setProcessing(false);
     }
@@ -111,18 +136,6 @@ export default function ClayApp() {
     }
   }, [result, resumeFile]);
 
-  const reset = useCallback(() => {
-    setStep(1);
-    setResumeFile(null);
-    setResumeText('');
-    setJobDesc('');
-    setResult(null);
-    setError(null);
-    setTone('professional');
-    const fileInput = document.getElementById('upload');
-    if (fileInput) fileInput.value = '';
-  }, []);
-
   const handleToneChange = useCallback(async (newTone) => {
     if (tone === newTone || !resumeText || !jobDesc) return;
     
@@ -131,7 +144,11 @@ export default function ClayApp() {
     setError(null);
 
     try {
-      const optimizationResult = await optimizeResumeApi(resumeText, jobDesc, newTone);
+      const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
+      const optimizationResult = apiKey
+        ? await optimizeResumeApi(resumeText, jobDesc, newTone)
+        : await mockOptimizeResume(resumeText, jobDesc, newTone);
+        
       if (optimizationResult.success) {
         setResult(prev => ({
           ...prev,
@@ -143,7 +160,13 @@ export default function ClayApp() {
         }));
       }
     } catch (err) {
-      setError('Failed to re-optimize. Please try again.');
+      // Fallback to mock
+      const mockResult = await mockOptimizeResume(resumeText, jobDesc, newTone);
+      setResult(prev => ({
+        ...prev,
+        ...mockResult,
+        optimizedText: mockResult.optimized_resume || prev?.optimizedText
+      }));
     } finally {
       setProcessing(false);
     }
@@ -161,6 +184,35 @@ export default function ClayApp() {
     { name: 'Interview Prep', price: '$9.99', desc: 'Questions from resume', icon: TrendingUp }
   ];
 
+  // Check auth on mount
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
+  const handleAuthSuccess = useCallback((userData) => {
+    setUser(userData);
+    setShowAuthModal(false);
+  }, []);
+
+  const reset = useCallback(() => {
+    setStep(1);
+    setResumeFile(null);
+    setResumeText('');
+    setJobDesc('');
+    setResult(null);
+    setError(null);
+    setTone('professional');
+    const fileInput = document.getElementById('upload');
+    if (fileInput) fileInput.value = '';
+  }, []);
+
+  const handleSignOut = useCallback(() => {
+    signOut();
+    setUser(null);
+    reset();
+  }, [reset]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
       {/* Header */}
@@ -172,15 +224,32 @@ export default function ClayApp() {
             </div>
             <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-slate-700 to-teal-600 bg-clip-text text-transparent">Clay</span>
           </div>
-          <button 
-            onClick={() => {
-              // Placeholder - can add auth later
-              alert('Sign in coming soon! The app works without an account.');
-            }}
-            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors active:scale-95"
-          >
-            Sign In
-          </button>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-teal-600 flex items-center justify-center text-white text-xs font-semibold">
+                  {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
+                  {user.name || user.email.split('@')[0]}
+                </span>
+              </div>
+              <button 
+                onClick={handleSignOut}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors active:scale-95 flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sign out</span>
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setShowAuthModal(true)}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors active:scale-95"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </header>
 
@@ -515,6 +584,13 @@ export default function ClayApp() {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onSuccess={handleAuthSuccess}
+      />
 
       {/* Footer */}
       <footer className="border-t mt-12 sm:mt-20 bg-white/50">

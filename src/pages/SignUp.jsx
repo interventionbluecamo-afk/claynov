@@ -69,10 +69,13 @@ export default function SignUp({ onSuccess, onBack, user }) {
             <Sparkles className="w-8 h-8 text-gray-900" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isSignIn ? 'Welcome back' : 'Create your account'}
+            {isSignIn ? 'Welcome back' : 'Join thousands optimizing their resumes'}
           </h1>
           <p className="text-gray-600">
-            {isSignIn ? 'Sign in to continue' : 'Save your progress and track your optimizations'}
+            {isSignIn 
+              ? 'Continue optimizing your resume' 
+              : 'Track your progress, save your optimized resumes, and unlock unlimited optimizations'
+            }
           </p>
         </div>
 
@@ -181,18 +184,24 @@ export default function SignUp({ onSuccess, onBack, user }) {
           </p>
         </div>
 
-        <div className="mt-8 space-y-3 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <span>100% free forever</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <span>No spam, ever</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <span>Your data stays private</span>
+        <div className="mt-8 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+          <div className="space-y-2.5 text-sm">
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-gray-700"><strong>3 free optimizations</strong> — no credit card needed</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-gray-700">Save all your optimized resumes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-gray-700">Unlock unlimited for just $7.99</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-gray-700">100% private · No spam, ever</span>
+            </div>
           </div>
         </div>
       </div>

@@ -89,8 +89,21 @@ export default function ClayApp() {
 
     // Check free uses limit
     if (!isPro && useCount >= 3) {
-      setShowUpgrade(true);
-      return;
+      // Show upgrade modal with better messaging
+      if (!user) {
+        // Encourage sign up first
+        const shouldSignUp = window.confirm(
+          'You\'ve used all 3 free optimizations! Sign up to unlock unlimited optimizations for just $7.99. Continue?'
+        );
+        if (shouldSignUp) {
+          setShowUpgrade(false);
+          setShowSignUpPage(true);
+          return;
+        }
+      } else {
+        setShowUpgrade(true);
+        return;
+      }
     }
 
     setProcessing(true);
@@ -229,13 +242,33 @@ export default function ClayApp() {
   }, [tone, resumeText, jobDesc]);
 
 
-  const handleUpgrade = useCallback(() => {
-    // Mock upgrade
-    const upgradedUser = { ...user, isPro: true };
-    setUser(upgradedUser);
-    localStorage.setItem('clay_current_user', JSON.stringify(upgradedUser));
-    setShowUpgrade(false);
-    alert('Payment processing coming soon! For now, enjoy Pro access.');
+  const handleUpgrade = useCallback(async () => {
+    // If user not signed in, redirect to sign up first
+    if (!user) {
+      setShowUpgrade(false);
+      setShowSignUpPage(true);
+      return;
+    }
+
+    try {
+      // Import Stripe utility
+      const { redirectToStripePayment } = await import('./utils/stripe');
+      
+      // Redirect to Stripe payment
+      redirectToStripePayment(user);
+    } catch (error) {
+      // Fallback: Show upgrade success (for demo/testing)
+      console.warn('Stripe not configured, using demo mode:', error.message);
+      const upgradedUser = { ...user, isPro: true };
+      setUser(upgradedUser);
+      localStorage.setItem('clay_current_user', JSON.stringify(upgradedUser));
+      setShowUpgrade(false);
+      
+      // In production, show error instead
+      if (import.meta.env.VITE_STRIPE_PAYMENT_LINK) {
+        setError('Payment processing failed. Please try again or contact support.');
+      }
+    }
   }, [user]);
 
   // Show SignUp page if needed
@@ -410,9 +443,21 @@ export default function ClayApp() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xl">✨</span>
-                <span>Free to start</span>
+                <span>3 free optimizations</span>
               </div>
             </div>
+            
+            {/* Soft CTA for sign up */}
+            {!user && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => setShowSignUpPage(true)}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors underline"
+                >
+                  Sign up to save your progress →
+                </button>
+              </div>
+            )}
           </div>
 
           {resumeFile && !uploading && (
@@ -682,76 +727,118 @@ Requirements:
                 <Zap className="w-8 h-8 text-amber-600" />
               </div>
               
-              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">You're on a roll! 🚀</h2>
-              <p className="text-base text-gray-600 text-center mb-4">
-                You've used all 3 free optimizations. Upgrade to Pro for unlimited optimizations!
+              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Ready to keep going? 🚀</h2>
+              <p className="text-base text-gray-600 text-center mb-6">
+                You've used all 3 free optimizations. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-6 text-center">
-                <p className="text-xs text-blue-700">
-                  💡 <strong>Tip:</strong> Sign up to track your progress and unlock more features. We use secure authentication to prevent abuse.
-                </p>
-              </div>
 
-              {/* Pricing */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-6 border-2 border-gray-900">
-                <div className="flex items-center justify-between mb-4">
+              {/* Pricing - Conversion Optimized */}
+              <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-white">
+                <div className="flex items-center justify-between mb-6">
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">$7.99</div>
-                    <div className="text-sm text-gray-600">one-time</div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-4xl font-bold">$7.99</span>
+                      <span className="text-lg text-white/70 line-through">$19.99</span>
+                    </div>
+                    <div className="text-sm text-white/70">One-time payment · No subscription</div>
                   </div>
-                  <div className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
-                    PAY ONCE
+                  <div className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-full">
+                    60% OFF
                   </div>
                 </div>
                 
-                <div className="space-y-2.5 mb-4">
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-gray-900 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700"><strong>Unlimited</strong> resume optimizations</span>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-base">Unlimited resume optimizations</div>
+                      <div className="text-sm text-white/70">Optimize as many resumes as you need</div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-gray-900 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700"><strong>All tone options</strong> (Creative, Technical, Executive)</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-base">All tone options unlocked</div>
+                      <div className="text-sm text-white/70">Professional, Creative, Technical, Executive</div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-gray-900 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700"><strong>Priority</strong> AI processing</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-base">Priority AI processing</div>
+                      <div className="text-sm text-white/70">Faster results when you need them</div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-gray-900 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700"><strong>Cover letter</strong> generator (coming soon)</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-base">Cover letter generator</div>
+                      <div className="text-sm text-white/70">Coming soon — yours at no extra cost</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/20">
+                  <div className="flex items-center justify-center gap-4 text-xs text-white/60">
+                    <div className="flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      <span>Secure payment</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      <span>Instant access</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              {!user && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                  <p className="text-sm text-blue-900 text-center">
+                    <strong>Sign up first</strong> to unlock Pro — takes 30 seconds
+                  </p>
+                </div>
+              )}
+
               <button
                 onClick={handleUpgrade}
-                className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all mb-3"
+                className="w-full h-16 bg-gray-900 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl mb-3"
               >
-                <Zap className="w-5 h-5" />
-                Get Pro for $7.99
+                <Zap className="w-6 h-6" />
+                {user ? 'Upgrade to Pro — $7.99' : 'Sign up & Upgrade — $7.99'}
               </button>
 
               <button
                 onClick={() => setShowUpgrade(false)}
                 className="w-full py-3 text-gray-600 font-medium text-sm hover:text-gray-900 transition-colors"
               >
-                Maybe later
+                Continue with free account
               </button>
 
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <p className="text-center text-xs text-gray-500 mb-3">
+                  Powered by Stripe · Secure payment processing
+                </p>
                 <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
-                    <Check className="w-3 h-3 text-gray-400" />
-                    <span>Secure payment</span>
+                    <Lock className="w-3 h-3 text-gray-400" />
+                    <span>Encrypted</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Check className="w-3 h-3 text-gray-400" />
                     <span>No subscription</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Check className="w-3 h-3 text-gray-400" />
-                    <span>Yours forever</span>
+                    <Zap className="w-3 h-3 text-gray-400" />
+                    <span>Instant access</span>
                   </div>
                 </div>
               </div>

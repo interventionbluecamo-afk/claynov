@@ -208,6 +208,13 @@ export default function ClayApp() {
   const handleToneChange = useCallback(async (newTone) => {
     if (tone === newTone || !resumeText || !jobDesc) return;
     
+    // Check if tone is locked for free users
+    const lockedTones = ['creative', 'technical', 'executive'];
+    if (!isPro && lockedTones.includes(newTone.toLowerCase())) {
+      setShowUpgrade(true);
+      return;
+    }
+    
     setTone(newTone);
     setProcessing(true);
     setError(null);
@@ -239,7 +246,7 @@ export default function ClayApp() {
     } finally {
       setProcessing(false);
     }
-  }, [tone, resumeText, jobDesc]);
+  }, [tone, resumeText, jobDesc, isPro]);
 
 
   const handleUpgrade = useCallback(async () => {
@@ -320,17 +327,23 @@ export default function ClayApp() {
                 />
               ))}
             </div>
-            {user ? (
-              <div className="flex items-center gap-2">
-                {!isPro && (
-                  <button
-                    onClick={() => setShowUpgrade(true)}
-                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all"
-                  >
-                    <Zap className="w-3.5 h-3.5" />
-                    <span>Pro</span>
-                  </button>
-                )}
+            <div className="flex items-center gap-2">
+              {!isPro && (
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      setShowSignUpPage(true);
+                    } else {
+                      setShowUpgrade(true);
+                    }
+                  }}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>Pro</span>
+                </button>
+              )}
+              {user ? (
                 <button 
                   onClick={() => {
                     signOut();
@@ -341,15 +354,15 @@ export default function ClayApp() {
                 >
                   {user?.email?.[0]?.toUpperCase() || 'U'}
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowSignUpPage(true)}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                Sign up
-              </button>
-            )}
+              ) : (
+                <button
+                  onClick={() => setShowSignUpPage(true)}
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Sign up
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -606,21 +619,48 @@ Requirements:
                 {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {['Professional', 'Creative', 'Technical', 'Executive'].map(t => (
+                {[
+                  { name: 'Professional', locked: false },
+                  { name: 'Creative', locked: !isPro },
+                  { name: 'Technical', locked: !isPro },
+                  { name: 'Executive', locked: !isPro }
+                ].map(t => (
                   <button 
-                    key={t}
-                    onClick={() => handleToneChange(t.toLowerCase())}
+                    key={t.name}
+                    onClick={() => {
+                      if (t.locked) {
+                        setShowUpgrade(true);
+                      } else {
+                        handleToneChange(t.name.toLowerCase());
+                      }
+                    }}
                     disabled={processing}
-                    className={`py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
-                      tone === t.toLowerCase()
+                    className={`py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 relative ${
+                      tone === t.name.toLowerCase()
                         ? 'bg-gray-900 text-white'
+                        : t.locked
+                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
                     }`}
                   >
-                    {t}
+                    {t.name}
+                    {t.locked && (
+                      <Lock className="w-3 h-3 absolute top-1 right-1" />
+                    )}
                   </button>
                 ))}
               </div>
+              {!isPro && (
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  <button 
+                    onClick={() => setShowUpgrade(true)}
+                    className="underline hover:text-gray-700"
+                  >
+                    Upgrade to Pro
+                  </button>
+                  {' '}to unlock Creative, Technical, and Executive tones
+                </p>
+              )}
             </div>
 
             {/* Improvements List */}
@@ -780,8 +820,8 @@ Requirements:
                       <Check className="w-3 h-3 text-white" />
                     </div>
                     <div>
-                      <div className="font-semibold text-base">Cover letter generator</div>
-                      <div className="text-sm text-white/70">Coming soon — yours at no extra cost</div>
+                      <div className="font-semibold text-base">Advanced ATS optimization</div>
+                      <div className="text-sm text-white/70">Deep keyword matching and formatting</div>
                     </div>
                   </div>
                 </div>

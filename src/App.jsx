@@ -522,8 +522,25 @@ export default function ClayApp() {
         <SignUp
           user={user}
           onSuccess={async (userData) => {
+            // CRITICAL: Clear localStorage use count when new user signs up
+            localStorage.removeItem('clay_use_count');
+            
             setUser(userData);
             setShowSignUpPage(false);
+            
+            // Load fresh use count from database for new user (should be 0)
+            if (userData?.id) {
+              try {
+                const count = await getUserUseCount(userData.id);
+                setUseCount(count);
+              } catch (error) {
+                console.error('Error loading use count after signup:', error);
+                setUseCount(0); // Always start at 0 for new users
+              }
+            } else {
+              setUseCount(0);
+            }
+            
             if (userData?.isPro) {
               setIsPro(true);
             }

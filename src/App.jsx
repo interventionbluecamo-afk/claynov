@@ -5,6 +5,8 @@ import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
 import { getCurrentUser, signOut } from './utils/auth';
+import { createConfetti } from './utils/confetti';
+import SignUp from './pages/SignUp';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -19,6 +21,7 @@ export default function ClayApp() {
   const [useCount, setUseCount] = useState(0);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showSignUpPage, setShowSignUpPage] = useState(false);
   const [user, setUser] = useState(null);
   const [authEmail, setAuthEmail] = useState('');
 
@@ -33,8 +36,13 @@ export default function ClayApp() {
     }
   }, []);
 
-  const isPro = user?.isPro || false;
+  const [isPro, setIsPro] = useState(user?.isPro || false);
   const freeUsesLeft = Math.max(0, 3 - useCount);
+
+  // Update isPro when user changes
+  useEffect(() => {
+    setIsPro(user?.isPro || false);
+  }, [user]);
 
   const handleFileUpload = useCallback(async (e) => {
     const file = e.target.files[0];
@@ -113,6 +121,8 @@ export default function ClayApp() {
       }
       
       setStep(3);
+      // Trigger confetti celebration!
+      createConfetti();
     } catch (err) {
       const errorMsg = err.message.includes('API key')
         ? 'Claude API not configured. Using mock data for demo.'
@@ -135,6 +145,8 @@ export default function ClayApp() {
           localStorage.setItem('clay_use_count', newCount.toString());
         }
         setStep(3);
+        // Trigger confetti celebration!
+        createConfetti();
       } catch (mockErr) {
         console.error('Mock API also failed:', mockErr);
       }
@@ -238,6 +250,23 @@ export default function ClayApp() {
     alert('Payment processing coming soon! For now, enjoy Pro access.');
   }, [user]);
 
+  // Show SignUp page if needed
+  if (showSignUpPage) {
+    return (
+      <SignUp
+        user={user}
+        onSuccess={(userData) => {
+          setUser(userData);
+          setShowSignUpPage(false);
+          if (userData?.isPro) {
+            setIsPro(true);
+          }
+        }}
+        onBack={() => setShowSignUpPage(false)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Minimal Header */}
@@ -294,7 +323,7 @@ export default function ClayApp() {
               </div>
             ) : (
               <button
-                onClick={() => setShowAuth(true)}
+                onClick={() => setShowSignUpPage(true)}
                 className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Sign in
@@ -541,17 +570,17 @@ Requirements:
               </div>
             </div>
 
-            {/* Preview */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-6">
-              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+            {/* Preview - Enhanced to pop more */}
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-900 overflow-hidden mb-6 transform hover:scale-[1.01] transition-transform duration-200">
+              <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-5 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-900">Preview</span>
+                  <FileText className="w-4 h-4 text-white" />
+                  <span className="text-sm font-semibold text-white">Preview</span>
                 </div>
-                <span className="text-xs text-gray-500">Scroll to see all</span>
+                <span className="text-xs text-white/80">Scroll to see all</span>
               </div>
               <div className="p-6 max-h-96 overflow-y-auto bg-white">
-                <pre className="whitespace-pre-wrap text-xs font-sans text-gray-800 leading-relaxed">
+                <pre className="whitespace-pre-wrap text-xs font-sans text-gray-900 leading-relaxed font-medium">
                   {result.optimizedText}
                 </pre>
               </div>
@@ -705,7 +734,7 @@ Requirements:
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-6 border-2 border-gray-900">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">$5</div>
+                    <div className="text-3xl font-bold text-gray-900">$7.99</div>
                     <div className="text-sm text-gray-600">one-time</div>
                   </div>
                   <div className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
@@ -731,12 +760,6 @@ Requirements:
                     <span className="text-gray-700"><strong>Cover letter</strong> generator (coming soon)</span>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-xs text-gray-600 text-center">
-                    <strong>Why so cheap?</strong> I'm building in public as a solo maker. My AI costs are ~$0.10 per resume. The $5 covers my costs and a coffee. ☕
-                  </p>
-                </div>
               </div>
 
               <button
@@ -744,7 +767,7 @@ Requirements:
                 className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all mb-3"
               >
                 <Zap className="w-5 h-5" />
-                Get Pro for $5
+                Get Pro for $7.99
               </button>
 
               <button

@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Sparkles, FileText, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2, LogOut, Upload, Download, RefreshCw, ChevronLeft, Zap } from 'lucide-react';
+import { Sparkles, FileText, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2, LogOut, Upload, Download, RefreshCw, ChevronLeft, ChevronDown, ChevronUp, Zap, MessageSquare } from 'lucide-react';
 import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
+import { generateInterviewQuestions } from './utils/interviewQuestions';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
 import { getCurrentUser, signOut, getUserUseCount, incrementUseCount, resetUseCount } from './utils/supabaseAuth';
 import { createConfetti } from './utils/confetti';
@@ -26,6 +27,13 @@ export default function ClayApp() {
   const [error, setError] = useState(null);
   const [tone, setTone] = useState('professional');
   const [formatting, setFormatting] = useState('modern');
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    tone: false,
+    format: false,
+    questions: false
+  });
   const [useCount, setUseCount] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
   const [showSignUpPage, setShowSignUpPage] = useState(false);
@@ -407,8 +415,47 @@ export default function ClayApp() {
     setResult(null);
     setError(null);
     setTone('professional');
+    setInterviewQuestions([]);
+    setExpandedSections({ tone: false, format: false, questions: false });
     const fileInput = document.getElementById('upload');
     if (fileInput) fileInput.value = '';
+  }, []);
+
+  const handleGenerateQuestions = useCallback(async () => {
+    if (!resumeText || !jobDesc) {
+      toast.error('Resume and job description required');
+      return;
+    }
+
+    setGeneratingQuestions(true);
+    try {
+      const result = await generateInterviewQuestions(resumeText, jobDesc);
+      if (result.success && result.questions) {
+        setInterviewQuestions(result.questions);
+        setExpandedSections(prev => ({ ...prev, questions: true }));
+        toast.success('Interview questions generated! 💡');
+      }
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      toast.error('Failed to generate questions. Using sample questions.');
+      // Fallback to sample questions
+      setInterviewQuestions([
+        "Tell me about your experience with this role.",
+        "What challenges have you faced in similar positions?",
+        "How do you approach problem-solving?",
+        "Why are you interested in this position?"
+      ]);
+      setExpandedSections(prev => ({ ...prev, questions: true }));
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  }, [resumeText, jobDesc]);
+
+  const toggleSection = useCallback((section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   }, []);
 
   const handleToneChange = useCallback(async (newTone) => {
@@ -855,102 +902,201 @@ Requirements:
               </div>
             </div>
 
-            {/* Quick Actions - Tone, Formatting & Regenerate */}
-            <div className="space-y-3 mb-6">
-              {/* Tone Switcher - Prominent & Thumb-Friendly */}
-              <div className="bg-white rounded-2xl border-2 border-gray-200 p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎯</span>
-                    <span className="text-sm font-semibold text-gray-900">Adjust tone</span>
+            {/* Quick Actions - Collapsible Sections (Airbnb-style) */}
+            <div className="space-y-2 mb-6">
+              {/* Tone Switcher - Collapsible */}
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection('tone')}
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">🎯</span>
+                    <div className="text-left">
+                      <div className="text-sm font-semibold text-gray-900">Adjust tone</div>
+                      <div className="text-xs text-gray-500">
+                        {tone.charAt(0).toUpperCase() + tone.slice(1)} • {!isPro ? 'Pro unlocks more' : 'All unlocked'}
+                      </div>
+                    </div>
                   </div>
-                  {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { name: 'Professional', emoji: '💼', locked: false },
-                    { name: 'Creative', emoji: '🎨', locked: !isPro },
-                    { name: 'Technical', emoji: '⚙️', locked: !isPro },
-                    { name: 'Executive', emoji: '👔', locked: !isPro }
-                  ].map(t => (
-                    <button 
-                      key={t.name}
-                      onClick={() => {
-                        if (t.locked) {
-                          setShowPricing(true);
-                        } else {
-                          handleToneChange(t.name.toLowerCase());
-                        }
-                      }}
-                      disabled={processing}
-                      className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative flex items-center justify-center gap-1.5 ${
-                        tone === t.name.toLowerCase()
-                          ? 'bg-gray-900 text-white shadow-md'
-                          : t.locked
-                          ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
-                      }`}
-                    >
-                      <span>{t.emoji}</span>
-                      <span>{t.name}</span>
-                      {t.locked && (
-                        <Lock className="w-3.5 h-3.5 absolute top-1.5 right-1.5 text-gray-400" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {!isPro && (
-                  <p className="text-xs text-gray-500 mt-2 text-center">
-                    <button 
-                      onClick={() => setShowPricing(true)}
-                      className="underline hover:text-gray-700 font-medium"
-                    >
-                      Upgrade to Pro
-                    </button>
-                    {' '}for all tones
-                  </p>
+                  {expandedSections.tone ? (
+                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+                {expandedSections.tone && (
+                  <div className="px-4 pb-4 border-t border-gray-100">
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {[
+                        { name: 'Professional', emoji: '💼', locked: false },
+                        { name: 'Creative', emoji: '🎨', locked: !isPro },
+                        { name: 'Technical', emoji: '⚙️', locked: !isPro },
+                        { name: 'Executive', emoji: '👔', locked: !isPro }
+                      ].map(t => (
+                        <button 
+                          key={t.name}
+                          onClick={() => {
+                            if (t.locked) {
+                              setShowPricing(true);
+                            } else {
+                              handleToneChange(t.name.toLowerCase());
+                            }
+                          }}
+                          disabled={processing}
+                          className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative flex items-center justify-center gap-1.5 ${
+                            tone === t.name.toLowerCase()
+                              ? 'bg-gray-900 text-white shadow-md'
+                              : t.locked
+                              ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
+                          }`}
+                        >
+                          <span>{t.emoji}</span>
+                          <span>{t.name}</span>
+                          {t.locked && (
+                            <Lock className="w-3.5 h-3.5 absolute top-1.5 right-1.5 text-gray-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    {!isPro && (
+                      <p className="text-xs text-gray-500 mt-3 text-center">
+                        <button 
+                          onClick={() => setShowPricing(true)}
+                          className="underline hover:text-gray-700 font-medium"
+                        >
+                          Upgrade to Pro
+                        </button>
+                        {' '}for all tones
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
-              {/* Formatting Options - Pro Only */}
+              {/* Formatting Options - Collapsible (Pro Only) */}
               {isPro && (
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border-2 border-purple-200 p-3 sm:p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">✨</span>
-                      <span className="text-sm font-semibold text-gray-900">Format style</span>
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border border-purple-200 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection('format')}
+                    className="w-full flex items-center justify-between p-4 hover:bg-purple-50/50 active:bg-purple-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">✨</span>
+                      <div className="text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-900">Format style</span>
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {formatting.charAt(0).toUpperCase() + formatting.slice(1)} selected
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { name: 'Modern', emoji: '🚀' },
-                      { name: 'Compact', emoji: '📄' },
-                      { name: 'Traditional', emoji: '📋' }
-                    ].map(f => (
-                      <button
-                        key={f.name}
-                        onClick={() => {
-                          setFormatting(f.name.toLowerCase());
-                          // Re-optimize with new formatting
-                          if (resumeText && jobDesc) {
-                            handleToneChange(tone); // Re-trigger optimization
-                          }
-                        }}
-                        disabled={processing}
-                        className={`h-11 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1 ${
-                          formatting === f.name.toLowerCase()
-                            ? 'bg-purple-600 text-white shadow-md'
-                            : 'bg-white text-gray-700 hover:bg-white/80 active:scale-95 border border-purple-200'
-                        }`}
-                      >
-                        <span className="text-base">{f.emoji}</span>
-                        <span>{f.name}</span>
-                      </button>
-                    ))}
-                  </div>
+                    {expandedSections.format ? (
+                      <ChevronUp className="w-5 h-5 text-purple-600" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-purple-600" />
+                    )}
+                  </button>
+                  {expandedSections.format && (
+                    <div className="px-4 pb-4 border-t border-purple-200">
+                      <div className="grid grid-cols-3 gap-2 mt-4">
+                        {[
+                          { name: 'Modern', emoji: '🚀' },
+                          { name: 'Compact', emoji: '📄' },
+                          { name: 'Traditional', emoji: '📋' }
+                        ].map(f => (
+                          <button
+                            key={f.name}
+                            onClick={() => {
+                              setFormatting(f.name.toLowerCase());
+                              if (resumeText && jobDesc) {
+                                handleToneChange(tone);
+                              }
+                            }}
+                            disabled={processing}
+                            className={`h-11 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1 ${
+                              formatting === f.name.toLowerCase()
+                                ? 'bg-purple-600 text-white shadow-md'
+                                : 'bg-white text-gray-700 hover:bg-white/80 active:scale-95 border border-purple-200'
+                            }`}
+                          >
+                            <span className="text-base">{f.emoji}</span>
+                            <span>{f.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
+
+              {/* Interview Questions - Collapsible */}
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => {
+                    if (!expandedSections.questions && interviewQuestions.length === 0) {
+                      handleGenerateQuestions();
+                    } else {
+                      toggleSection('questions');
+                    }
+                  }}
+                  disabled={generatingQuestions}
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-5 h-5 text-gray-700" />
+                    <div className="text-left">
+                      <div className="text-sm font-semibold text-gray-900">Interview questions</div>
+                      <div className="text-xs text-gray-500">
+                        {interviewQuestions.length > 0 
+                          ? `${interviewQuestions.length} questions ready` 
+                          : 'Generate personalized questions'}
+                      </div>
+                    </div>
+                  </div>
+                  {generatingQuestions ? (
+                    <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                  ) : expandedSections.questions ? (
+                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+                {expandedSections.questions && interviewQuestions.length > 0 && (
+                  <div className="px-4 pb-4 border-t border-gray-100">
+                    <div className="space-y-2 mt-4">
+                      {interviewQuestions.map((question, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700"
+                        >
+                          {idx + 1}. {question}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleGenerateQuestions}
+                      disabled={generatingQuestions}
+                      className="w-full mt-3 h-10 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                      {generatingQuestions ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4" />
+                          Regenerate questions
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Regenerate Button */}
               <button
@@ -959,7 +1105,7 @@ Requirements:
                 className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
-                <span>Regenerate with same settings</span>
+                <span>Regenerate resume</span>
               </button>
             </div>
 

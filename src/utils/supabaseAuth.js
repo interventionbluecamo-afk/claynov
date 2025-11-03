@@ -16,17 +16,30 @@ export async function signUp(email, password, name) {
   }
 
   try {
+    // Trim and validate email
+    const trimmedEmail = email.trim().toLowerCase();
+    
+    if (!trimmedEmail || trimmedEmail.length < 3) {
+      throw new Error('Email is required and must be at least 3 characters');
+    }
+    
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: trimmedEmail,
       password,
       options: {
         data: {
-          name: name,
+          name: name?.trim() || '',
         }
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      // Better error messages
+      if (error.message?.includes('email') || error.message?.includes('Email')) {
+        throw new Error('Invalid email format. Please check and try again.');
+      }
+      throw error;
+    }
 
     // Get user profile (wait a moment for trigger to create it)
     await new Promise(resolve => setTimeout(resolve, 500));

@@ -21,9 +21,14 @@ export default function SignUp({ onSuccess, onBack, user }) {
     if (!value) {
       return 'Email is required';
     }
+    // More permissive email regex that handles common formats
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
+    if (!emailRegex.test(value.trim())) {
       return 'Please enter a valid email address';
+    }
+    // Additional check for minimum length
+    if (value.trim().length < 3) {
+      return 'Email is too short';
     }
     return '';
   };
@@ -49,7 +54,7 @@ export default function SignUp({ onSuccess, onBack, user }) {
   };
 
   const handleEmailChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.trim(); // Trim whitespace
     setEmail(value);
     if (value && !isSignIn) {
       setEmailError(validateEmail(value));
@@ -97,19 +102,36 @@ export default function SignUp({ onSuccess, onBack, user }) {
 
     try {
       let userData;
+      // Trim email before sending
+      const trimmedEmail = email.trim();
+      
       if (isSignIn) {
-        userData = await signIn(email, password);
+        userData = await signIn(trimmedEmail, password);
         toast.success('Welcome back!');
       } else {
-        userData = await signUp(email, password, name);
+        userData = await signUp(trimmedEmail, password, name.trim());
         toast.success('Account created successfully!');
       }
       
       onSuccess(userData);
     } catch (err) {
-      const errorMsg = err.message || 'Something went wrong. Please try again.';
+      // Better error handling - check for specific Supabase errors
+      let errorMsg = err.message || 'Something went wrong. Please try again.';
+      
+      // Handle common Supabase errors
+      if (err.message?.includes('Invalid email') || err.message?.includes('email')) {
+        errorMsg = 'Please check your email format and try again';
+      } else if (err.message?.includes('already registered') || err.message?.includes('already exists')) {
+        errorMsg = 'An account with this email already exists. Try signing in instead.';
+      } else if (err.message?.includes('password')) {
+        errorMsg = 'Password does not meet requirements. Please try again.';
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMsg = 'Network error. Please check your connection and try again.';
+      }
+      
       setError(errorMsg);
       toast.error(errorMsg);
+      console.error('Sign up error:', err); // Log for debugging
     } finally {
       setLoading(false);
     }

@@ -776,6 +776,70 @@ Requirements:
               </div>
             </div>
 
+            {/* Quick Actions - Tone & Regenerate */}
+            <div className="space-y-3 mb-6">
+              {/* Tone Switcher - Prominent & Thumb-Friendly */}
+              <div className="bg-white rounded-2xl border-2 border-gray-200 p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-gray-900">Adjust tone</span>
+                  {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { name: 'Professional', locked: false },
+                    { name: 'Creative', locked: !isPro },
+                    { name: 'Technical', locked: !isPro },
+                    { name: 'Executive', locked: !isPro }
+                  ].map(t => (
+                    <button 
+                      key={t.name}
+                      onClick={() => {
+                        if (t.locked) {
+                          setShowPricing(true);
+                        } else {
+                          handleToneChange(t.name.toLowerCase());
+                        }
+                      }}
+                      disabled={processing}
+                      className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative ${
+                        tone === t.name.toLowerCase()
+                          ? 'bg-gray-900 text-white shadow-md'
+                          : t.locked
+                          ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
+                      }`}
+                    >
+                      {t.name}
+                      {t.locked && (
+                        <Lock className="w-4 h-4 absolute top-2 right-2 text-gray-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {!isPro && (
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    <button 
+                      onClick={() => setShowPricing(true)}
+                      className="underline hover:text-gray-700 font-medium"
+                    >
+                      Upgrade to Pro
+                    </button>
+                    {' '}for all tones
+                  </p>
+                )}
+              </div>
+
+              {/* Regenerate Button */}
+              <button
+                onClick={() => handleOptimize()}
+                disabled={processing || !resumeText || !jobDesc}
+                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
+                <span>Regenerate with same tone</span>
+              </button>
+            </div>
+
             {/* Improvements Count */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-6">
               <div className="flex items-center justify-center gap-2">
@@ -813,56 +877,6 @@ Requirements:
               </div>
             </div>
 
-            {/* Tone Switcher */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-900">Tone</span>
-                {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { name: 'Professional', locked: false },
-                  { name: 'Creative', locked: !isPro },
-                  { name: 'Technical', locked: !isPro },
-                  { name: 'Executive', locked: !isPro }
-                ].map(t => (
-                  <button 
-                    key={t.name}
-                    onClick={() => {
-                      if (t.locked) {
-                        setShowPricing(true);
-                      } else {
-                        handleToneChange(t.name.toLowerCase());
-                      }
-                    }}
-                    disabled={processing}
-                    className={`py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 relative ${
-                      tone === t.name.toLowerCase()
-                        ? 'bg-gray-900 text-white'
-                        : t.locked
-                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
-                    }`}
-                  >
-                    {t.name}
-                    {t.locked && (
-                      <Lock className="w-4 h-4 absolute top-1.5 right-1.5 text-gray-500" />
-                    )}
-                  </button>
-                ))}
-              </div>
-              {!isPro && (
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  <button 
-                    onClick={() => setShowPricing(true)}
-                    className="underline hover:text-gray-700"
-                  >
-                    Upgrade to Pro
-                  </button>
-                  {' '}to unlock Creative, Technical, and Executive tones
-                </p>
-              )}
-            </div>
 
             {/* Improvements List */}
             {result.changes && result.changes.length > 0 && (

@@ -31,6 +31,8 @@ export default function ClayApp() {
   const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
+  const [currentTrustSignal, setCurrentTrustSignal] = useState(null);
+  const [trustSignalIndex, setTrustSignalIndex] = useState(0);
 
   // Check auth on mount
   useEffect(() => {

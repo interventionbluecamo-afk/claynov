@@ -40,6 +40,8 @@ export default function ClayApp() {
   const [showPricing, setShowPricing] = useState(false);
   const [showSignUpPage, setShowSignUpPage] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [user, setUser] = useState(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [currentTrustSignal, setCurrentTrustSignal] = useState(null);
@@ -570,6 +572,24 @@ export default function ClayApp() {
           }}
         />
         <ToastContainer />
+      </ErrorBoundary>
+    );
+  }
+
+  // Show Terms page if needed
+  if (showTerms) {
+    return (
+      <ErrorBoundary>
+        <Terms onBack={() => setShowTerms(false)} />
+      </ErrorBoundary>
+    );
+  }
+
+  // Show Privacy page if needed
+  if (showPrivacy) {
+    return (
+      <ErrorBoundary>
+        <Privacy onBack={() => setShowPrivacy(false)} />
       </ErrorBoundary>
     );
   }

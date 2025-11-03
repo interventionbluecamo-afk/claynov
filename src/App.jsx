@@ -216,7 +216,18 @@ export default function ClayApp() {
       });
 
       // Increment use count if not pro
-      if (!isPro) {
+      if (!isPro && user?.id) {
+        try {
+          const newCount = await incrementUseCount(user.id);
+          setUseCount(newCount);
+          localStorage.setItem('clay_use_count', newCount.toString());
+        } catch (error) {
+          console.error('Error incrementing use count:', error);
+          const newCount = useCount + 1;
+          setUseCount(newCount);
+          localStorage.setItem('clay_use_count', newCount.toString());
+        }
+      } else if (!isPro) {
         const newCount = useCount + 1;
         setUseCount(newCount);
         localStorage.setItem('clay_use_count', newCount.toString());
@@ -246,7 +257,18 @@ export default function ClayApp() {
           gaps: mockResult.gap_analysis || [],
           optimizedText: mockResult.optimized_resume || resumeText
         });
-        if (!isPro) {
+        if (!isPro && user?.id) {
+          try {
+            const newCount = await incrementUseCount(user.id);
+            setUseCount(newCount);
+            localStorage.setItem('clay_use_count', newCount.toString());
+          } catch (error) {
+            console.error('Error incrementing use count:', error);
+            const newCount = useCount + 1;
+            setUseCount(newCount);
+            localStorage.setItem('clay_use_count', newCount.toString());
+          }
+        } else if (!isPro) {
           const newCount = useCount + 1;
           setUseCount(newCount);
           localStorage.setItem('clay_use_count', newCount.toString());

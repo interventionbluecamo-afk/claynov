@@ -832,15 +832,39 @@ export default function ClayApp() {
                   </p>
                 </div>
 
-                {/* Feature 4: Instant Results */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-4">
-                    <Zap className="w-7 h-7 text-amber-600" />
+                {/* Feature 4: Pro Features Highlight */}
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+                  <div className="relative">
+                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                      <Zap className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-bold text-white">Pro Features</h3>
+                      <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full font-semibold backdrop-blur-sm">Pro</span>
+                    </div>
+                    <p className="text-sm text-gray-200 leading-relaxed mb-3">
+                      Unlock unlimited optimizations, all writing styles, interview questions, and format options.
+                    </p>
+                    <ul className="space-y-1.5 text-xs text-gray-300">
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />
+                        <span>Unlimited resume optimizations</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />
+                        <span>All writing styles (Creative, Technical, Executive)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />
+                        <span>AI-generated interview questions</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-white flex-shrink-0" />
+                        <span>Multiple format styles</span>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Instant Optimization</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Get your optimized resume in seconds. No waiting, no delays—just upload, paste, and download.
-                  </p>
                 </div>
               </div>
 

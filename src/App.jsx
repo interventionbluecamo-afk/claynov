@@ -28,6 +28,7 @@ export default function ClayApp() {
   const [useCount, setUseCount] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
   const [showSignUpPage, setShowSignUpPage] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
 
@@ -329,6 +330,28 @@ export default function ClayApp() {
     );
   }
 
+  // Show Profile page if needed
+  if (showProfile) {
+    return (
+      <ErrorBoundary>
+        <Profile
+          user={user}
+          setUser={setUser}
+          onBack={() => {
+            setShowProfile(false);
+            // If user clicked "Upgrade to Pro", show pricing
+            const shouldShowPricing = localStorage.getItem('clay_profile_upgrade_click');
+            if (shouldShowPricing === 'true') {
+              localStorage.removeItem('clay_profile_upgrade_click');
+              setShowPricing(true);
+            }
+          }}
+        />
+        <ToastContainer />
+      </ErrorBoundary>
+    );
+  }
+
   // Show SignUp page if needed
   if (showSignUpPage) {
     return (
@@ -414,7 +437,7 @@ export default function ClayApp() {
       </header>
 
       {/* Step Progress Indicator - Only show when in flow (step 1-3) */}
-      {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && (
+      {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && !showProfile && (
         <div className="border-b bg-white">
           <StepProgress currentStep={step} />
         </div>
@@ -442,7 +465,7 @@ export default function ClayApp() {
                 {formatWeeklyCount(weeklyCount)} resumes optimized this week
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-                Land any job
+                Land jobs like never before
               </h1>
               <p className="text-xl text-gray-600">Tailor your resume with AI ⚡</p>
             </div>
@@ -462,7 +485,7 @@ export default function ClayApp() {
                     ? 'border-gray-400 bg-gray-50' 
                     : resumeFile 
                     ? 'border-gray-900 bg-gray-50' 
-                    : 'border-gray-300 hover:border-gray-400 bg-white'
+                    : 'border-gray-300 hover:border-gray-400 bg-gradient-to-br from-gray-50 via-white to-gray-50'
                 }`}>
                   <div className="flex flex-col items-center gap-6">
                     {uploading ? (

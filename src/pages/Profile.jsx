@@ -198,7 +198,10 @@ export default function Profile({ onBack, user, setUser }) {
                   </div>
                   {!isPro && (
                     <button
-                      onClick={onBack}
+                      onClick={() => {
+                        localStorage.setItem('clay_profile_upgrade_click', 'true');
+                        onBack();
+                      }}
                       className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 active:scale-95 transition-all"
                     >
                       Upgrade to Pro

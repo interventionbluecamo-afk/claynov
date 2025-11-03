@@ -871,44 +871,44 @@ Requirements:
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
                 Resume optimized! 🎉
               </h1>
-              <p className="text-base sm:text-lg text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Ready to download and start applying
               </p>
             </div>
 
-            {/* Stats Cards - Improved Design */}
+            {/* Stats Cards - Refined Design */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">🎯</span>
-                  <div className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">{result.ats}</div>
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight mb-1.5">
+                  {result.ats}
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600 font-medium mb-2">ATS Score</div>
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
-                  <span className="text-xs text-green-600 font-medium">Excellent</span>
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
+                  <span className="text-xs text-green-600 font-semibold">Excellent</span>
                 </div>
               </div>
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">⭐</span>
-                  <div className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">{result.match}%</div>
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight mb-1.5">
+                  {result.match}%
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600 font-medium mb-2">Job Match</div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500 fill-amber-500" />
-                  <span className="text-xs text-amber-600 font-medium">Strong match</span>
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500" />
+                  <span className="text-xs text-amber-600 font-semibold">Strong match</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Actions - Collapsible Sections (Airbnb-style) */}
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2.5 mb-6">
               {/* Tone Switcher - Collapsible */}
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <button
                   onClick={() => toggleSection('tone')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+                  aria-label={`${expandedSections.tone ? 'Collapse' : 'Expand'} tone options`}
+                  aria-expanded={expandedSections.tone}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">🎯</span>
@@ -977,10 +977,12 @@ Requirements:
 
               {/* Formatting Options - Collapsible (Pro Only) */}
               {isPro && (
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border border-purple-200 overflow-hidden">
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border border-purple-200 overflow-hidden shadow-sm">
                   <button
                     onClick={() => toggleSection('format')}
                     className="w-full flex items-center justify-between p-4 hover:bg-purple-50/50 active:bg-purple-50 transition-colors"
+                    aria-label={`${expandedSections.format ? 'Collapse' : 'Expand'} format options`}
+                    aria-expanded={expandedSections.format}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">✨</span>
@@ -1033,25 +1035,36 @@ Requirements:
                 </div>
               )}
 
-              {/* Interview Questions - Collapsible */}
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              {/* Interview Questions - Collapsible (Pro Only with Preview) */}
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <button
                   onClick={() => {
-                    if (!expandedSections.questions && interviewQuestions.length === 0) {
+                    if (!isPro) {
+                      setShowPricing(true);
+                    } else if (!expandedSections.questions && interviewQuestions.length === 0) {
                       handleGenerateQuestions();
                     } else {
                       toggleSection('questions');
                     }
                   }}
                   disabled={generatingQuestions}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 active:bg-gray-100 transition-colors disabled:opacity-50"
+                  aria-label={`${expandedSections.questions ? 'Collapse' : 'Expand'} interview questions`}
+                  aria-expanded={expandedSections.questions}
                 >
                   <div className="flex items-center gap-3">
                     <MessageSquare className="w-5 h-5 text-gray-700" />
-                    <div className="text-left">
-                      <div className="text-sm font-semibold text-gray-900">Interview questions</div>
+                    <div className="text-left flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900">Interview questions</span>
+                        {!isPro && (
+                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                        )}
+                      </div>
                       <div className="text-xs text-gray-500">
-                        {interviewQuestions.length > 0 
+                        {!isPro 
+                          ? 'Preview available • Upgrade to Pro for full access'
+                          : interviewQuestions.length > 0 
                           ? `${interviewQuestions.length} questions ready` 
                           : 'Generate personalized questions'}
                       </div>
@@ -1065,35 +1078,73 @@ Requirements:
                     <ChevronDown className="w-5 h-5 text-gray-400" />
                   )}
                 </button>
-                {expandedSections.questions && interviewQuestions.length > 0 && (
+                {expandedSections.questions && (
                   <div className="px-4 pb-4 border-t border-gray-100">
-                    <div className="space-y-2 mt-4">
-                      {interviewQuestions.map((question, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700"
-                        >
-                          {idx + 1}. {question}
+                    {!isPro ? (
+                      /* Preview for free users */
+                      <div className="mt-4 space-y-2">
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
+                          1. Tell me about your experience with [relevant skill from job description].
                         </div>
-                      ))}
-                    </div>
-                    <button
-                      onClick={handleGenerateQuestions}
-                      disabled={generatingQuestions}
-                      className="w-full mt-3 h-10 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
-                    >
-                      {generatingQuestions ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-4 h-4" />
-                          Regenerate questions
-                        </>
-                      )}
-                    </button>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
+                          2. How do you approach [key responsibility from job description]?
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
+                          3. Can you walk me through a project where you [relevant achievement]?
+                        </div>
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                            <Lock className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700">
+                            4. [Locked - Upgrade to Pro to see all questions]
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setShowPricing(true)}
+                          className="w-full mt-3 h-10 bg-gray-900 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-800 active:scale-[0.98] transition-all"
+                        >
+                          <Zap className="w-4 h-4" />
+                          Upgrade to Pro for all questions
+                        </button>
+                      </div>
+                    ) : interviewQuestions.length > 0 ? (
+                      /* Full questions for Pro users */
+                      <>
+                        <div className="space-y-2 mt-4">
+                          {interviewQuestions.map((question, idx) => (
+                            <div
+                              key={idx}
+                              className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700"
+                            >
+                              {idx + 1}. {question}
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          onClick={handleGenerateQuestions}
+                          disabled={generatingQuestions}
+                          className="w-full mt-3 h-10 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
+                        >
+                          {generatingQuestions ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="w-4 h-4" />
+                              Regenerate questions
+                            </>
+                          )}
+                        </button>
+                      </>
+                    ) : (
+                      /* Empty state for Pro users */
+                      <div className="mt-4 text-center py-4">
+                        <p className="text-sm text-gray-500">Click above to generate questions</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1102,7 +1153,8 @@ Requirements:
               <button
                 onClick={() => handleOptimize()}
                 disabled={processing || !resumeText || !jobDesc}
-                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Regenerate resume with current settings"
               >
                 <RefreshCw className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
                 <span>Regenerate resume</span>
@@ -1112,58 +1164,39 @@ Requirements:
             {/* Primary Download CTA */}
             <button 
               onClick={handleDownload}
-              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
+              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-2.5 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
+              aria-label="Download optimized resume as DOCX file"
             >
-              <span className="text-xl">💾</span>
               <Download className="w-5 h-5 sm:w-6 sm:h-6" /> 
-              <span>Download Resume (DOCX)</span>
+              <span>Download Resume</span>
             </button>
           </div>
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
             {/* Full Preview */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="px-4 sm:px-5 py-3.5 bg-gray-50/50 border-b border-gray-200">
+                <div className="flex items-center gap-2.5">
                   <FileText className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-semibold text-gray-900">Preview</span>
+                  <span className="text-sm font-semibold text-gray-900">Resume Preview</span>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 max-h-[55vh] overflow-y-auto">
-                <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 font-sans">
+              <div className="p-4 sm:p-6 max-h-[60vh] overflow-y-auto bg-white">
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 font-sans font-normal">
                   {result.optimizedText}
                 </pre>
               </div>
             </div>
 
-
-            {/* Improvements List */}
-            {result.changes && result.changes.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-semibold text-gray-900">Key improvements</span>
-                </div>
-                <div className="space-y-2.5">
-                  {result.changes.slice(0, 4).map((change, idx) => (
-                    <div key={idx} className="flex gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 leading-relaxed">{change}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Social Proof */}
-            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-              <div className="flex items-center gap-1 mb-2 justify-center">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 sm:p-6 border border-amber-200/60 shadow-sm">
+              <div className="flex items-center gap-1 mb-3 justify-center">
                 {[1,2,3,4,5].map(i => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-sm text-gray-900 text-center font-medium mb-1">
+              <p className="text-sm sm:text-base text-gray-900 text-center font-semibold mb-1.5 leading-relaxed">
                 "Got 3 interviews in a week!"
               </p>
               <p className="text-xs text-gray-600 text-center">— Marcus L., Product Manager</p>
@@ -1172,7 +1205,7 @@ Requirements:
             {/* Secondary CTA */}
             <button 
               onClick={handleReset}
-              className="w-full h-12 bg-white text-gray-700 rounded-xl font-medium text-sm border-2 border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all"
+              className="w-full h-12 bg-white text-gray-700 rounded-xl font-medium text-sm border border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all"
               aria-label="Optimize another resume"
             >
               <RefreshCw className="w-4 h-4" /> 

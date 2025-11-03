@@ -69,13 +69,30 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
 
 Return ONLY the JSON object, no additional text.`;
 
-  const userPrompt = `Resume to optimize:
+  const userPrompt = `**RESUME TO OPTIMIZE:**
+
 ${resumeText}
 
-Job Description:
+---
+
+**JOB DESCRIPTION:**
+
 ${jobDescription}
 
-Please analyze and optimize this resume for the job description above. Return only valid JSON, no additional text.`;
+---
+
+**INSTRUCTIONS:**
+1. Analyze the resume against the job description
+2. Identify gaps, missing keywords, and areas for improvement
+3. Optimize the resume content while maintaining authenticity
+4. Calculate ATS score (0-100) based on keyword optimization and formatting
+5. Calculate Match score (0-100) based on alignment with job requirements
+6. List 3-5 specific key changes made
+7. Provide gap analysis with actionable recommendations
+8. Rewrite the complete resume with optimizations
+9. Use ${tone} tone throughout
+
+Return ONLY the JSON object with the structure specified in the system prompt.`;
 
   try {
     const response = await fetch(`https://api.anthropic.com/v1/messages`, {

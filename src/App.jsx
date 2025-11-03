@@ -675,7 +675,7 @@ export default function ClayApp() {
       </header>
 
       {/* Step Progress Indicator - Only show when in flow (step 1-3) */}
-      {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && !showProfile && (
+      {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && !showProfile && !showTerms && !showPrivacy && (
         <div className="bg-white border-b border-gray-100">
           <StepProgress currentStep={step} />
         </div>

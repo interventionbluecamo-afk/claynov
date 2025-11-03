@@ -344,7 +344,7 @@ export default function ClayApp() {
                 <div className={`rounded-3xl p-12 border-2 transition-all cursor-pointer ${
                   uploading 
                     ? 'border-gray-400 bg-gray-50' 
-                    : file 
+                    : resumeFile 
                     ? 'border-gray-900 bg-gray-50' 
                     : 'border-gray-300 hover:border-gray-400 bg-white'
                 }`}>
@@ -356,13 +356,13 @@ export default function ClayApp() {
                           <p className="text-lg font-semibold text-gray-900 mb-1">Reading your resume...</p>
                         </div>
                       </>
-                    ) : file ? (
+                    ) : resumeFile ? (
                       <>
                         <div className="w-20 h-20 rounded-2xl bg-gray-900 flex items-center justify-center">
                           <Check className="w-10 h-10 text-white" />
                         </div>
                         <div className="text-center">
-                          <p className="text-lg font-semibold text-gray-900 mb-1 break-all px-2">{file.name}</p>
+                          <p className="text-lg font-semibold text-gray-900 mb-1 break-all px-2">{resumeFile.name}</p>
                           <p className="text-sm text-gray-600">Ready</p>
                         </div>
                       </>
@@ -404,7 +404,7 @@ export default function ClayApp() {
             </div>
           </div>
 
-          {file && !uploading && (
+          {resumeFile && !uploading && (
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
               <div className="max-w-2xl mx-auto">
                 <button 

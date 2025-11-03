@@ -317,11 +317,21 @@ export default function ClayApp() {
       createConfetti();
       toast.success('Resume optimized successfully! 🎉');
     } catch (err) {
+      // Handle CORS errors - Anthropic API can't be called from browser
+      const isCorsError = err.message?.includes('CORS_BLOCKED') || err.message?.includes('Failed to fetch');
       const errorMsg = err.message.includes('API key')
         ? 'Claude API not configured. Using mock data for demo.'
+        : isCorsError
+        ? 'AI optimization requires a backend server. Using demo data for now.'
         : err.message || 'Failed to optimize resume. Please try again.';
-      setError(errorMsg);
-      toast.error(errorMsg);
+      
+      if (isCorsError) {
+        console.warn('CORS error detected - falling back to mock API');
+        toast.info('Using demo optimization (AI requires backend setup)');
+      } else {
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
       
       try {
         const mockResult = await mockOptimizeResume(resumeText, jobDesc, tone);

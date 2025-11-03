@@ -135,49 +135,48 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
           </div>
         </div>
 
-        {/* Sign Up Notice */}
-        {!user && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
-            <p className="text-xs sm:text-sm text-blue-900 text-center">
-              <strong>Sign up</strong> first or continue below
-            </p>
-          </div>
-        )}
-
         {/* CTA Buttons */}
         <div className="space-y-3 sm:space-y-4">
-          <button
-            onClick={handleUpgradeClick}
-            disabled={loading}
-            className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
+          {!user ? (
+            <>
+              {/* For anonymous users: Sign up AND upgrade in one flow */}
+              <button
+                onClick={() => {
+                  // Store upgrade intent and trigger sign up
+                  localStorage.setItem('clay_upgrade_after_signup', 'true');
+                  onBack();
+                  requestAnimationFrame(() => {
+                    window.dispatchEvent(new CustomEvent('clay:showSignUp', { detail: { fromPricing: true } }));
+                  });
+                }}
+                className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl"
+              >
                 <Zap className="w-6 h-6 sm:w-7 sm:h-7" />
-                <span>{user ? 'Upgrade to Pro — $7.99' : 'Get Pro — $7.99'}</span>
-              </>
-            )}
-          </button>
-          
-          {!user && (
+                <span>Sign up & Upgrade to Pro — $7.99</span>
+              </button>
+              
+              <p className="text-xs text-gray-500 text-center">
+                Create your free account and upgrade to Pro in one step
+              </p>
+            </>
+          ) : (
+            /* For logged-in users: Just upgrade */
             <button
-              onClick={() => {
-                // Store upgrade intent and trigger sign up via callback
-                localStorage.setItem('clay_upgrade_after_signup', 'true');
-                onBack();
-                // Use requestAnimationFrame for proper React state update timing
-                requestAnimationFrame(() => {
-                  window.dispatchEvent(new CustomEvent('clay:showSignUp', { detail: { fromPricing: true } }));
-                });
-              }}
-              className="w-full h-14 bg-gray-100 text-gray-900 rounded-xl font-semibold text-base hover:bg-gray-200 active:scale-[0.98] transition-all"
+              onClick={handleUpgradeClick}
+              disabled={loading}
+              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign up first (free)
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7" />
+                  <span>Upgrade to Pro — $7.99</span>
+                </>
+              )}
             </button>
           )}
         </div>

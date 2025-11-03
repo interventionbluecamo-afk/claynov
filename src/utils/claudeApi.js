@@ -151,6 +151,12 @@ Return ONLY the JSON object with the structure specified in the system prompt.`;
     };
   } catch (error) {
     console.error('Claude API error:', error);
+    
+    // Handle CORS errors specifically (Anthropic API doesn't support direct browser calls)
+    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
+      throw new Error('CORS_BLOCKED: Claude API cannot be called directly from the browser. Please use a backend proxy or mock API for development.');
+    }
+    
     throw error;
   }
 }

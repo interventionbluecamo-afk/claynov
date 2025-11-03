@@ -1003,37 +1003,43 @@ Requirements:
           <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
             {/* Quick Actions - Collapsible Sections (Airbnb-style) */}
             <div className="space-y-2.5">
-              {/* Tone Switcher - Collapsible */}
+              {/* Tone Switcher - Improved Mobile Design */}
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <button
                   onClick={() => toggleSection('tone')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
                   aria-label={`${expandedSections.tone ? 'Collapse' : 'Expand'} tone options`}
                   aria-expanded={expandedSections.tone}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">🎯</span>
-                    <div className="text-left">
-                      <div className="text-sm font-semibold text-gray-900">Adjust tone</div>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <div className="text-base font-bold text-gray-900 mb-0.5">Change writing style</div>
                       <div className="text-xs text-gray-500">
-                        {tone.charAt(0).toUpperCase() + tone.slice(1)} • {!isPro ? 'Pro unlocks more' : 'All unlocked'}
+                        Currently: {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                        {!isPro && ' • More styles available'}
                       </div>
                     </div>
                   </div>
                   {expandedSections.tone ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                    <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   )}
                 </button>
                 {expandedSections.tone && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
-                    <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div className="px-5 pb-5 border-t border-gray-100">
+                    <p className="text-xs text-gray-600 mb-4 mt-4">
+                      Match your resume's tone to the job and company culture
+                    </p>
+                    <div className="space-y-2.5">
                       {[
-                        { name: 'Professional', emoji: '💼', locked: false },
-                        { name: 'Creative', emoji: '🎨', locked: !isPro },
-                        { name: 'Technical', emoji: '⚙️', locked: !isPro },
-                        { name: 'Executive', emoji: '👔', locked: !isPro }
+                        { name: 'Professional', emoji: '💼', locked: false, desc: 'Formal and polished' },
+                        { name: 'Creative', emoji: '🎨', locked: !isPro, desc: 'Dynamic and expressive' },
+                        { name: 'Technical', emoji: '⚙️', locked: !isPro, desc: 'Precise and detailed' },
+                        { name: 'Executive', emoji: '👔', locked: !isPro, desc: 'Strategic and leadership-focused' }
                       ].map(t => (
                         <button 
                           key={t.name}
@@ -1045,31 +1051,38 @@ Requirements:
                             }
                           }}
                           disabled={processing}
-                          className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative flex items-center justify-center gap-1.5 ${
+                          className={`w-full h-16 rounded-xl transition-all disabled:opacity-50 relative flex items-center gap-3 px-4 ${
                             tone === t.name.toLowerCase()
                               ? 'bg-gray-900 text-white shadow-md'
                               : t.locked
-                              ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
+                              ? 'bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-200'
+                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 active:scale-[0.98] border border-gray-200'
                           }`}
                         >
-                          <span>{t.emoji}</span>
-                          <span>{t.name}</span>
+                          <span className="text-2xl flex-shrink-0">{t.emoji}</span>
+                          <div className="flex-1 text-left min-w-0">
+                            <div className={`font-semibold text-base mb-0.5 ${tone === t.name.toLowerCase() ? 'text-white' : 'text-gray-900'}`}>
+                              {t.name}
+                            </div>
+                            <div className={`text-xs ${tone === t.name.toLowerCase() ? 'text-gray-200' : 'text-gray-500'}`}>
+                              {t.desc}
+                            </div>
+                          </div>
                           {t.locked && (
-                            <Lock className="w-3.5 h-3.5 absolute top-1.5 right-1.5 text-gray-400" />
+                            <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                           )}
                         </button>
                       ))}
                     </div>
                     {!isPro && (
-                      <p className="text-xs text-gray-500 mt-3 text-center">
+                      <p className="text-xs text-gray-500 mt-4 text-center">
                         <button 
                           onClick={() => setShowPricing(true)}
-                          className="underline hover:text-gray-700 font-medium"
+                          className="text-gray-700 hover:text-gray-900 font-semibold underline underline-offset-2"
                         >
-                          Upgrade to Pro
+                          Unlock all styles
                         </button>
-                        {' '}for all tones
+                        {' '}with Pro
                       </p>
                     )}
                   </div>
@@ -1136,7 +1149,7 @@ Requirements:
                 </div>
               )}
 
-              {/* Interview Questions - Collapsible (Pro Only with Preview) */}
+              {/* Interview Questions - Improved Mobile Design */}
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <button
                   onClick={() => {
@@ -1149,83 +1162,114 @@ Requirements:
                     }
                   }}
                   disabled={generatingQuestions}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 active:bg-gray-100 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 active:bg-gray-100 transition-colors disabled:opacity-50"
                   aria-label={`${expandedSections.questions ? 'Collapse' : 'Expand'} interview questions`}
                   aria-expanded={expandedSections.questions}
                 >
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="w-5 h-5 text-gray-700" />
-                    <div className="text-left flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-900">Interview questions</span>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-base font-bold text-gray-900">Practice interview questions</span>
                         {!isPro && (
-                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Pro</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500">
                         {!isPro 
-                          ? 'Preview available • Upgrade to Pro for full access'
+                          ? 'Get personalized questions tailored to this role'
                           : interviewQuestions.length > 0 
-                          ? `${interviewQuestions.length} questions ready` 
-                          : 'Generate personalized questions'}
+                          ? `${interviewQuestions.length} questions ready to practice` 
+                          : 'Generate questions based on your resume'}
                       </div>
                     </div>
                   </div>
                   {generatingQuestions ? (
-                    <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                    <Loader2 className="w-5 h-5 text-gray-400 animate-spin flex-shrink-0 ml-2" />
                   ) : expandedSections.questions ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                    <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   )}
                 </button>
                 {expandedSections.questions && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
+                  <div className="px-5 pb-5 border-t border-gray-100">
                     {!isPro ? (
                       /* Preview for free users */
-                      <div className="mt-4 space-y-2">
-                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
-                          1. Tell me about your experience with [relevant skill from job description].
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
-                          2. How do you approach [key responsibility from job description]?
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 opacity-75">
-                          3. Can you walk me through a project where you [relevant achievement]?
-                        </div>
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                            <Lock className="w-5 h-5 text-gray-400" />
-                          </div>
-                          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700">
-                            4. [Locked - Upgrade to Pro to see all questions]
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-600 mb-4">
+                          See sample questions based on this role. Get all questions with Pro.
+                        </p>
+                        <div className="space-y-3">
+                          {[
+                            "Tell me about your experience with the skills mentioned in this role.",
+                            "How do you approach the key responsibilities outlined in the job description?",
+                            "Can you walk me through a project that demonstrates your qualifications?"
+                          ].map((question, idx) => (
+                            <div key={idx} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                              <div className="flex gap-3">
+                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <span className="text-xs font-bold text-gray-600">{idx + 1}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed flex-1">
+                                  {question}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10 border border-gray-200">
+                              <div className="flex flex-col items-center gap-2">
+                                <Lock className="w-6 h-6 text-gray-400" />
+                                <span className="text-xs font-medium text-gray-500">More questions available</span>
+                              </div>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 opacity-50">
+                              <div className="flex gap-3">
+                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <span className="text-xs font-bold text-gray-600">4+</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed flex-1">
+                                  Additional personalized questions based on your resume...
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <button
                           onClick={() => setShowPricing(true)}
-                          className="w-full mt-3 h-10 bg-gray-900 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-800 active:scale-[0.98] transition-all"
+                          className="w-full mt-4 h-12 bg-gray-900 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-800 active:scale-[0.98] transition-all"
                         >
                           <Zap className="w-4 h-4" />
-                          Upgrade to Pro for all questions
+                          Unlock all questions with Pro
                         </button>
                       </div>
                     ) : interviewQuestions.length > 0 ? (
                       /* Full questions for Pro users */
                       <>
-                        <div className="space-y-2 mt-4">
+                        <div className="space-y-3 mt-4">
                           {interviewQuestions.map((question, idx) => (
                             <div
                               key={idx}
-                              className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700"
+                              className="p-4 bg-gray-50 rounded-xl border border-gray-200"
                             >
-                              {idx + 1}. {question}
+                              <div className="flex gap-3">
+                                <div className="w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <span className="text-xs font-bold text-white">{idx + 1}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed flex-1">
+                                  {question}
+                                </p>
+                              </div>
                             </div>
                           ))}
                         </div>
                         <button
                           onClick={handleGenerateQuestions}
                           disabled={generatingQuestions}
-                          className="w-full mt-3 h-10 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
+                          className="w-full mt-4 h-12 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
                           {generatingQuestions ? (
                             <>
@@ -1235,15 +1279,17 @@ Requirements:
                           ) : (
                             <>
                               <RefreshCw className="w-4 h-4" />
-                              Regenerate questions
+                              Generate new questions
                             </>
                           )}
                         </button>
                       </>
                     ) : (
                       /* Empty state for Pro users */
-                      <div className="mt-4 text-center py-4">
-                        <p className="text-sm text-gray-500">Click above to generate questions</p>
+                      <div className="mt-4 text-center py-6">
+                        <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-sm font-medium text-gray-700 mb-1">Ready to generate questions</p>
+                        <p className="text-xs text-gray-500">Tap above to create personalized interview questions</p>
                       </div>
                     )}
                   </div>

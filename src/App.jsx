@@ -714,18 +714,6 @@ export default function ClayApp() {
                 <span>3 free optimizations</span>
               </div>
             </div>
-            
-            {/* Soft CTA for sign up */}
-            {!user && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => setShowSignUpPage(true)}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors underline"
-                >
-                  Sign up to save your progress →
-                </button>
-              </div>
-            )}
           </div>
 
           {resumeFile && !uploading && (

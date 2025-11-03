@@ -89,21 +89,38 @@ See [DEPLOY.md](./DEPLOY.md) for detailed instructions.
 ```
 claynov/
 ├── src/
-│   ├── App.jsx              # Main application
-│   ├── components/          # Reusable components
-│   │   ├── UploadZone.jsx
-│   │   ├── ErrorBanner.jsx
-│   │   ├── StatsCard.jsx
-│   │   └── StepIndicator.jsx
-│   ├── utils/               # Utility functions
-│   │   ├── fileParser.js
-│   │   ├── claudeApi.js
-│   │   └── resumeGenerator.js
-│   ├── main.jsx
-│   └── index.css
-├── vercel.json              # Vercel configuration
-├── package.json
-└── vite.config.js
+│   ├── App.jsx                    # Main application component
+│   ├── main.jsx                   # React entry point
+│   ├── index.css                  # Global styles
+│   ├── components/                # Reusable UI components
+│   │   ├── BeforeAfter.jsx       # Before/after comparison view
+│   │   ├── ErrorBanner.jsx       # Error display component
+│   │   ├── StatsCard.jsx         # Stats/metrics display
+│   │   ├── StepIndicator.jsx     # Progress indicator
+│   │   ├── UploadZone.jsx        # File upload component
+│   │   └── UserCount.jsx         # User count display
+│   ├── pages/                     # Page components
+│   │   └── SignUp.jsx             # Sign up/sign in page
+│   └── utils/                     # Utility functions
+│       ├── auth.js                # Authentication (localStorage-based, will migrate to Supabase)
+│       ├── claudeApi.js           # Claude AI API integration
+│       ├── confetti.js            # Confetti animation utility
+│       ├── fileParser.js          # PDF/DOC/DOCX parsing
+│       ├── mockApi.js             # Mock API for testing
+│       ├── resumeGenerator.js     # DOCX resume generation
+│       ├── stripe.js              # Stripe payment integration
+│       └── weeklyCount.js         # Weekly counter logic
+├── docs/                          # Documentation
+│   ├── CLAUDE_SETUP.md           # Claude API setup guide
+│   ├── STRIPE_SETUP.md           # Stripe payment setup
+│   └── ...                        # Additional docs
+├── dist/                          # Build output (gitignored)
+├── env.example                    # Environment variables template
+├── index.html                     # HTML entry point
+├── package.json                   # Dependencies and scripts
+├── tailwind.config.js            # Tailwind CSS configuration
+├── vite.config.js                 # Vite configuration
+└── vercel.json                    # Vercel deployment config
 ```
 
 ## 🔧 Configuration

@@ -396,7 +396,7 @@ export default function ClayApp() {
                 aria-label="View Pro pricing"
               >
                 <Zap className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden sm:inline">{isPro ? 'Pro' : 'Pro'}</span>
+                <span className="hidden sm:inline">Pro</span>
               </button>
               {user ? (
                 <button 

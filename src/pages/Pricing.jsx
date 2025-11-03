@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Zap, Check, Lock, Star } from 'lucide-react';
 import { toast } from '../components/Toast';
+import { t } from '../utils/i18n';
 
 export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUsesLeft = 3, isPro = false }) {
   const [loading, setLoading] = useState(false);
@@ -59,76 +60,76 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
         </div>
 
         {/* Pricing Card */}
-        <div className="bg-gray-900 rounded-3xl p-6 sm:p-8 mb-6 text-white shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+        <div className="bg-gray-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 text-white shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
             <div>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl sm:text-6xl font-bold">$7.99</span>
-                <span className="text-xl sm:text-2xl text-white/70 line-through">$19.99</span>
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-4xl sm:text-5xl md:text-6xl font-bold">$7.99</span>
+                <span className="text-lg sm:text-xl md:text-2xl text-white/70 line-through">$19.99</span>
               </div>
-              <div className="text-sm sm:text-base text-white/70">One-time payment · No subscription</div>
+              <div className="text-xs sm:text-sm text-white/70">One-time payment · No subscription</div>
             </div>
-            <div className="px-4 py-2 bg-green-500 text-white text-sm sm:text-base font-bold rounded-full whitespace-nowrap">
+            <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500 text-white text-xs sm:text-sm font-bold rounded-full whitespace-nowrap">
               60% OFF
             </div>
           </div>
           
-          {/* Features List */}
-          <div className="space-y-4 sm:space-y-5 mb-6 sm:mb-8">
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          {/* Features List - Compact */}
+          <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
               <div>
-                <div className="font-bold text-base sm:text-lg mb-1">Unlimited resume optimizations</div>
-                <div className="text-sm sm:text-base text-white/70">Optimize as many resumes as you need</div>
+                <div className="font-bold text-sm sm:text-base">Unlimited optimizations</div>
+                <div className="text-xs sm:text-sm text-white/70 hidden sm:block">Optimize as many resumes as you need</div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
               <div>
-                <div className="font-bold text-base sm:text-lg mb-1">All tone options unlocked</div>
-                <div className="text-sm sm:text-base text-white/70">Professional, Creative, Technical, Executive</div>
+                <div className="font-bold text-sm sm:text-base">All tone options</div>
+                <div className="text-xs sm:text-sm text-white/70 hidden sm:block">Professional, Creative, Technical, Executive</div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
               <div>
-                <div className="font-bold text-base sm:text-lg mb-1">Priority AI processing</div>
-                <div className="text-sm sm:text-base text-white/70">Faster results when you need them</div>
+                <div className="font-bold text-sm sm:text-base">Priority processing</div>
+                <div className="text-xs sm:text-sm text-white/70 hidden sm:block">Faster results when you need them</div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
               <div>
-                <div className="font-bold text-base sm:text-lg mb-1">Advanced ATS optimization</div>
-                <div className="text-sm sm:text-base text-white/70">Deep keyword matching and formatting</div>
+                <div className="font-bold text-sm sm:text-base">Advanced ATS</div>
+                <div className="text-xs sm:text-sm text-white/70 hidden sm:block">Deep keyword matching</div>
               </div>
             </div>
           </div>
 
           {/* Trust Indicators */}
-          <div className="pt-6 border-t border-white/20">
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-white/60">
-              <div className="flex items-center gap-1.5">
-                <Lock className="w-4 h-4" />
-                <span>Secure payment</span>
+          <div className="pt-4 sm:pt-6 border-t border-white/20">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs text-white/60">
+              <div className="flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Secure</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-4 h-4" />
-                <span>Instant access</span>
+              <div className="flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" />
+                <span>Instant</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Check className="w-4 h-4" />
+              <div className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
                 <span>No subscription</span>
               </div>
             </div>
@@ -137,9 +138,9 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
 
         {/* Sign Up Notice */}
         {!user && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-5 mb-6">
-            <p className="text-sm sm:text-base text-blue-900 text-center font-medium">
-              <strong>Sign up</strong> (30 seconds) or continue below to upgrade
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-blue-900 text-center">
+              <strong>Sign up</strong> first or continue below
             </p>
           </div>
         )}

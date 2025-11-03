@@ -1,26 +1,33 @@
 # Stripe Payment Setup - Quick Guide
 
-## Step 1: Create Stripe Payment Link
+## ✅ Payment Link Configured
+
+Your Stripe Payment Link is already set up:
+- **Link**: https://buy.stripe.com/6oU5kv9kV4kSbUf79rcAo00
+- **Price**: $7.99 (one-time payment)
+
+## Step 1: Configure Return URL
 
 1. **Go to Stripe Dashboard**
    - https://dashboard.stripe.com/payment-links
-   - Make sure you're in **Test mode** first (toggle in top right)
+   - Find your payment link: `https://buy.stripe.com/6oU5kv9kV4kSbUf79rcAo00`
 
-2. **Create New Payment Link**
-   - Click **"Create payment link"**
-   - Product name: `Clay Pro Upgrade`
-   - Price: `$7.99` (one-time payment)
-   - Description: `Unlimited resume optimizations, all tone options, and priority AI processing`
-   - Click **"Create link"**
-
-3. **Configure Return URL**
-   - After creating, click on the payment link to edit
+2. **Edit Payment Link**
+   - Click on the payment link
    - Scroll to **"After payment"** section
    - Set **Return URL** to: `https://your-vercel-domain.vercel.app` (or your production domain)
-   - Or for testing: `http://localhost:5173` (your dev server)
+   - Or for testing: `http://localhost:3000` (your dev server)
 
-4. **Copy Payment Link**
-   - Copy the payment link (format: `https://buy.stripe.com/...`)
+## 🛠️ Developer Bypass (For Testing)
+
+A subtle developer bypass is built in:
+- **Keyboard Shortcut**: Press `Ctrl+Shift+B` (or `Cmd+Shift+B` on Mac)
+- This will temporarily unlock Pro features for testing
+- Works only when signed in
+- Stored in localStorage (not permanent)
+- Toggle again to disable
+
+**Note**: This bypass is client-side only and won't affect production users.
 
 ---
 

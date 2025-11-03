@@ -70,9 +70,16 @@ export async function createCheckoutSession(userData) {
  * Uses Stripe Payment Links - easier setup
  */
 export function redirectToStripePayment(userData) {
+  // Check for dev bypass
+  if (localStorage.getItem('clay_dev_bypass') === 'true') {
+    // In dev bypass mode, just upgrade locally
+    console.log('🛠️ Dev bypass: Skipping Stripe payment');
+    return { bypassed: true };
+  }
+  
   // Get your Stripe Payment Link from: https://dashboard.stripe.com/payment-links
   // Format: https://buy.stripe.com/...
-  const paymentLink = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
+  const paymentLink = import.meta.env.VITE_STRIPE_PAYMENT_LINK || 'https://buy.stripe.com/6oU5kv9kV4kSbUf79rcAo00';
   
   if (!paymentLink || paymentLink.includes('your_payment_link_here')) {
     throw new Error('Stripe payment link not configured. Please set VITE_STRIPE_PAYMENT_LINK in your environment variables.');

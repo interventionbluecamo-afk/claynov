@@ -35,10 +35,50 @@ export default function ClayApp() {
   const [currentTrustSignal, setCurrentTrustSignal] = useState(null);
   const [trustSignalIndex, setTrustSignalIndex] = useState(0);
 
+  // Developer bypass (Ctrl/Cmd + Shift + B)
+  useEffect(() => {
+    const handleDevBypass = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'B') {
+        e.preventDefault();
+        // Toggle dev bypass mode
+        const currentBypass = localStorage.getItem('clay_dev_bypass') === 'true';
+        const newBypass = !currentBypass;
+        localStorage.setItem('clay_dev_bypass', newBypass.toString());
+        
+        if (newBypass && user) {
+          // Temporarily upgrade to Pro for testing
+          const bypassUser = { ...user, isPro: true };
+          setUser(bypassUser);
+          setIsPro(true);
+          toast.success('Dev bypass enabled - Pro features unlocked 🛠️');
+        } else if (newBypass) {
+          toast.success('Dev bypass enabled - Sign in to activate 🛠️');
+        } else {
+          // Remove bypass
+          if (user && !user.isPro) {
+            setIsPro(false);
+            const normalUser = { ...user, isPro: false };
+            setUser(normalUser);
+          }
+          toast.info('Dev bypass disabled');
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleDevBypass);
+    return () => window.removeEventListener('keydown', handleDevBypass);
+  }, [user]);
+
   // Check auth on mount
   useEffect(() => {
     const loadUser = async () => {
       const currentUser = await getCurrentUser();
+      
+      // Apply dev bypass if enabled
+      if (localStorage.getItem('clay_dev_bypass') === 'true' && currentUser) {
+        currentUser.isPro = true;
+      }
+      
       setUser(currentUser);
       
       // Load use count from Supabase (or localStorage fallback)

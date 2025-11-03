@@ -10,6 +10,8 @@ import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import ErrorBoundary from './components/ErrorBoundary';
+import { ToastContainer, toast } from './components/Toast';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -66,12 +68,16 @@ export default function ClayApp() {
     const fileName = file.name.toLowerCase();
     
     if (!validExtensions.some(ext => fileName.endsWith(ext))) {
-      setError('Please upload a PDF, DOC, or DOCX file.');
+      const errorMsg = 'Please upload a PDF, DOC, or DOCX file.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB. Please compress your file.');
+      const errorMsg = 'File size must be less than 5MB. Please compress your file.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -86,7 +92,9 @@ export default function ClayApp() {
       }
       setResumeText(parsed.text);
     } catch (err) {
-      setError(err.message || 'An error occurred while processing your file.');
+      const errorMsg = err.message || 'An error occurred while processing your file.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       setResumeFile(null);
     } finally {
       setUploading(false);
@@ -95,7 +103,9 @@ export default function ClayApp() {
 
   const handleOptimize = useCallback(async () => {
     if (!resumeText.trim() || !jobDesc.trim()) {
-      setError('Please provide both a resume and job description.');
+      const errorMsg = 'Please provide both a resume and job description.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -148,11 +158,13 @@ export default function ClayApp() {
       setWeeklyCount(newWeeklyCount);
       // Trigger confetti celebration!
       createConfetti();
+      toast.success('Resume optimized successfully! 🎉');
     } catch (err) {
       const errorMsg = err.message.includes('API key')
         ? 'Claude API not configured. Using mock data for demo.'
         : err.message || 'Failed to optimize resume. Please try again.';
       setError(errorMsg);
+      toast.error(errorMsg);
       
       try {
         const mockResult = await mockOptimizeResume(resumeText, jobDesc, tone);
@@ -272,6 +284,7 @@ export default function ClayApp() {
       
       // Redirect to Stripe payment
       redirectToStripePayment(user);
+      toast.info('Redirecting to secure payment...');
     } catch (error) {
       // Fallback: Show upgrade success (for demo/testing)
       console.warn('Stripe not configured, using demo mode:', error.message);
@@ -279,10 +292,14 @@ export default function ClayApp() {
       setUser(upgradedUser);
       localStorage.setItem('clay_current_user', JSON.stringify(upgradedUser));
       setShowPricing(false);
+      toast.success('Upgraded to Pro! 🎉');
       
       // In production, show error instead
       if (import.meta.env.VITE_STRIPE_PAYMENT_LINK) {
-        setError('Payment processing failed. Please try again or contact support.');
+        const errorMsg = 'Payment processing failed. Please try again or contact support.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+        throw error;
       }
     }
   }, [user]);
@@ -290,43 +307,49 @@ export default function ClayApp() {
   // Show Pricing page if needed
   if (showPricing) {
     return (
-      <Pricing
-        user={user}
-        useCount={useCount}
-        freeUsesLeft={freeUsesLeft}
-        isPro={isPro}
-        onUpgrade={handleUpgrade}
-        onBack={() => {
-          setShowPricing(false);
-          localStorage.removeItem('clay_upgrade_after_signup');
-        }}
-      />
+      <ErrorBoundary>
+        <Pricing
+          user={user}
+          useCount={useCount}
+          freeUsesLeft={freeUsesLeft}
+          isPro={isPro}
+          onUpgrade={handleUpgrade}
+          onBack={() => {
+            setShowPricing(false);
+            localStorage.removeItem('clay_upgrade_after_signup');
+          }}
+        />
+        <ToastContainer />
+      </ErrorBoundary>
     );
   }
 
   // Show SignUp page if needed
   if (showSignUpPage) {
     return (
-      <SignUp
-        user={user}
-        onSuccess={(userData) => {
-          setUser(userData);
-          setShowSignUpPage(false);
-          if (userData?.isPro) {
-            setIsPro(true);
-          }
-          // If user signed up with upgrade intent, show pricing page
-          const upgradeAfterSignup = localStorage.getItem('clay_upgrade_after_signup');
-          if (upgradeAfterSignup === 'true') {
+      <ErrorBoundary>
+        <SignUp
+          user={user}
+          onSuccess={(userData) => {
+            setUser(userData);
+            setShowSignUpPage(false);
+            if (userData?.isPro) {
+              setIsPro(true);
+            }
+            // If user signed up with upgrade intent, show pricing page
+            const upgradeAfterSignup = localStorage.getItem('clay_upgrade_after_signup');
+            if (upgradeAfterSignup === 'true') {
+              localStorage.removeItem('clay_upgrade_after_signup');
+              setShowPricing(true);
+            }
+          }}
+          onBack={() => {
+            setShowSignUpPage(false);
             localStorage.removeItem('clay_upgrade_after_signup');
-            setShowPricing(true);
-          }
-        }}
-        onBack={() => {
-          setShowSignUpPage(false);
-          localStorage.removeItem('clay_upgrade_after_signup');
-        }}
-      />
+          }}
+        />
+        <ToastContainer />
+      </ErrorBoundary>
     );
   }
 
@@ -364,19 +387,17 @@ export default function ClayApp() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              {!isPro && (
-                <button
-                  onClick={() => {
-                    // Always show pricing page - no sign-up required to view
-                    setShowPricing(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all min-h-[44px]"
-                  aria-label="View Pro pricing"
-                >
-                  <Zap className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden sm:inline">Pro</span>
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  // Always show pricing page - no sign-up required to view
+                  setShowPricing(true);
+                }}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all min-h-[44px]"
+                aria-label="View Pro pricing"
+              >
+                <Zap className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">{isPro ? 'Pro' : 'Pro'}</span>
+              </button>
               {user ? (
                 <button 
                   onClick={() => {
@@ -514,9 +535,10 @@ export default function ClayApp() {
               <div className="max-w-2xl mx-auto">
                 <button 
                   onClick={() => setStep(2)} 
-                  className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                  className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 >
-                  Continue <ArrowRight className="w-5 h-5" />
+                  <span>Continue</span>
+                  <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -526,23 +548,24 @@ export default function ClayApp() {
 
       {/* Step 2: Job Description */}
       {step === 2 && (
-        <div className="flex-1 flex flex-col pb-24 max-w-2xl mx-auto w-full px-4 pt-8">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Paste the job posting</h2>
-            <p className="text-lg text-gray-600">Include the full description for best results 🎯</p>
-            <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                <span>Your resume stays on your device</span>
+        <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full">
+          <div className="flex-1 flex flex-col px-4 pt-6 sm:pt-8 pb-24 sm:pb-20">
+            <div className="mb-4 sm:mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Paste the job posting</h2>
+              <p className="text-base sm:text-lg text-gray-600 mb-3">Include the full description for best results 🎯</p>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  <span>Your resume stays on your device</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex-1 flex flex-col min-h-0">
-            <textarea 
-              value={jobDesc} 
-              onChange={(e) => setJobDesc(e.target.value)} 
-              placeholder="Senior Product Manager
+            <div className="flex-1 flex flex-col min-h-0 mb-4">
+              <textarea 
+                value={jobDesc} 
+                onChange={(e) => setJobDesc(e.target.value)} 
+                placeholder="Senior Product Manager
 
 About the role:
 We're seeking an experienced PM to lead our product team…
@@ -552,38 +575,39 @@ Requirements:
 • Strong agile/scrum experience
 • Data-driven decision maker
 • Excellent communication skills"
-              className="flex-1 w-full p-5 border-2 border-gray-200 rounded-2xl focus:border-gray-900 outline-none resize-none text-base leading-relaxed bg-white transition-all"
-              style={{ minHeight: '400px' }}
-            />
-            <div className="mt-3 flex items-center justify-between px-1">
-              <p className="text-xs text-gray-500">
-                {jobDesc.length > 0 ? `${jobDesc.length} characters` : 'More detail = better match'}
-              </p>
-              {jobDesc.length > 200 && (
-                <div className="flex items-center gap-1.5 text-xs text-green-600">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Looking good!</span>
-                </div>
-              )}
+                className="flex-1 w-full p-4 sm:p-5 border-2 border-gray-200 rounded-2xl focus:border-gray-900 outline-none resize-none text-base leading-relaxed bg-white transition-all"
+                style={{ minHeight: '300px' }}
+              />
+              <div className="mt-3 flex items-center justify-between px-1">
+                <p className="text-xs text-gray-500">
+                  {jobDesc.length > 0 ? `${jobDesc.length} characters` : 'More detail = better match'}
+                </p>
+                {jobDesc.length > 200 && (
+                  <div className="flex items-center gap-1.5 text-xs text-green-600">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Looking good!</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg">
             <div className="max-w-2xl mx-auto">
               <button 
                 onClick={handleOptimize} 
                 disabled={!jobDesc.trim() || processing || !resumeText}
-                className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Optimizing...
+                    <span>Optimizing...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    Optimize Resume
+                    <span>Optimize Resume</span>
                   </>
                 )}
               </button>
@@ -734,6 +758,7 @@ Requirements:
             <button 
               onClick={handleReset}
               className="w-full h-12 bg-white text-gray-700 rounded-xl font-medium text-sm border-2 border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all"
+              aria-label="Optimize another resume"
             >
               <RefreshCw className="w-4 h-4" /> 
               <span>Optimize Another</span>
@@ -741,10 +766,11 @@ Requirements:
           </div>
 
           {/* Fixed Bottom Download */}
-          <div className="border-t bg-white p-4">
+          <div className="border-t bg-white p-4 shadow-lg">
             <button 
               onClick={handleDownload}
               className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+              aria-label="Download resume as DOCX file"
             >
               <Download className="w-5 h-5" /> 
               <span>Download Resume (DOCX)</span>
@@ -801,6 +827,8 @@ Requirements:
         </div>
       </footer>
 
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }

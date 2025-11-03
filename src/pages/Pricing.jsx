@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Zap, Check, Lock, Star } from 'lucide-react';
+import { toast } from '../components/Toast';
 
 export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUsesLeft = 3, isPro = false }) {
   const [loading, setLoading] = useState(false);
@@ -8,7 +9,9 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
     setLoading(true);
     try {
       await onUpgrade();
-    } finally {
+      // Note: onUpgrade handles redirect to Stripe, so we won't see this if successful
+    } catch (error) {
+      toast.error('Failed to process upgrade. Please try again.');
       setLoading(false);
     }
   };
@@ -147,7 +150,7 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
           <button
             onClick={handleUpgradeClick}
             disabled={loading}
-            className="w-full h-16 sm:h-20 bg-gray-900 text-white rounded-2xl font-bold text-lg sm:text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

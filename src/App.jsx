@@ -8,6 +8,7 @@ import { getCurrentUser, signOut } from './utils/supabaseAuth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
+import Profile from './pages/Profile';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -393,15 +394,11 @@ export default function ClayApp() {
               </button>
               {user ? (
                 <button 
-                  onClick={async () => {
-                    await signOut();
-                    setUser(null);
-                    handleReset();
-                  }}
+                  onClick={() => setShowProfile(true)}
                   className="w-11 h-11 rounded-full bg-gray-900 text-white text-sm font-semibold flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all"
-                  aria-label={`Signed in as ${user.email}. Click to sign out.`}
+                  aria-label={`View profile for ${user.email}`}
                 >
-                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                 </button>
               ) : (
                 <button

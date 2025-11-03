@@ -25,6 +25,7 @@ export default function ClayApp() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [tone, setTone] = useState('professional');
+  const [formatting, setFormatting] = useState('modern');
   const [useCount, setUseCount] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
   const [showSignUpPage, setShowSignUpPage] = useState(false);
@@ -571,7 +572,7 @@ export default function ClayApp() {
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
                 Land jobs like never before
               </h1>
-              <p className="text-xl text-gray-600">Tailor your resume with AI ⚡</p>
+              <p className="text-xl text-gray-600">AI recrafts your resume for each job—boost your chances ✨</p>
             </div>
 
             <div className="w-full max-w-md mx-auto">
@@ -759,37 +760,46 @@ Requirements:
             {/* Stats Cards - Improved Design */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
               <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
-                <div className="text-4xl sm:text-5xl font-bold text-gray-900 mb-1 tracking-tight">{result.ats}</div>
-                <div className="text-xs sm:text-sm text-gray-600 font-medium">ATS Score</div>
-                <div className="mt-2 flex items-center gap-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">🎯</span>
+                  <div className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">{result.ats}</div>
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600 font-medium mb-2">ATS Score</div>
+                <div className="flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                   <span className="text-xs text-green-600 font-medium">Excellent</span>
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
-                <div className="text-4xl sm:text-5xl font-bold text-gray-900 mb-1 tracking-tight">{result.match}%</div>
-                <div className="text-xs sm:text-sm text-gray-600 font-medium">Job Match</div>
-                <div className="mt-2 flex items-center gap-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">⭐</span>
+                  <div className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">{result.match}%</div>
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600 font-medium mb-2">Job Match</div>
+                <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500 fill-amber-500" />
                   <span className="text-xs text-amber-600 font-medium">Strong match</span>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions - Tone & Regenerate */}
+            {/* Quick Actions - Tone, Formatting & Regenerate */}
             <div className="space-y-3 mb-6">
               {/* Tone Switcher - Prominent & Thumb-Friendly */}
               <div className="bg-white rounded-2xl border-2 border-gray-200 p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-gray-900">Adjust tone</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎯</span>
+                    <span className="text-sm font-semibold text-gray-900">Adjust tone</span>
+                  </div>
                   {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { name: 'Professional', locked: false },
-                    { name: 'Creative', locked: !isPro },
-                    { name: 'Technical', locked: !isPro },
-                    { name: 'Executive', locked: !isPro }
+                    { name: 'Professional', emoji: '💼', locked: false },
+                    { name: 'Creative', emoji: '🎨', locked: !isPro },
+                    { name: 'Technical', emoji: '⚙️', locked: !isPro },
+                    { name: 'Executive', emoji: '👔', locked: !isPro }
                   ].map(t => (
                     <button 
                       key={t.name}
@@ -801,7 +811,7 @@ Requirements:
                         }
                       }}
                       disabled={processing}
-                      className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative ${
+                      className={`h-12 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 relative flex items-center justify-center gap-1.5 ${
                         tone === t.name.toLowerCase()
                           ? 'bg-gray-900 text-white shadow-md'
                           : t.locked
@@ -809,9 +819,10 @@ Requirements:
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
                       }`}
                     >
-                      {t.name}
+                      <span>{t.emoji}</span>
+                      <span>{t.name}</span>
                       {t.locked && (
-                        <Lock className="w-4 h-4 absolute top-2 right-2 text-gray-400" />
+                        <Lock className="w-3.5 h-3.5 absolute top-1.5 right-1.5 text-gray-400" />
                       )}
                     </button>
                   ))}
@@ -829,6 +840,46 @@ Requirements:
                 )}
               </div>
 
+              {/* Formatting Options - Pro Only */}
+              {isPro && (
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border-2 border-purple-200 p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">✨</span>
+                      <span className="text-sm font-semibold text-gray-900">Format style</span>
+                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: 'Modern', emoji: '🚀' },
+                      { name: 'Compact', emoji: '📄' },
+                      { name: 'Traditional', emoji: '📋' }
+                    ].map(f => (
+                      <button
+                        key={f.name}
+                        onClick={() => {
+                          setFormatting(f.name.toLowerCase());
+                          // Re-optimize with new formatting
+                          if (resumeText && jobDesc) {
+                            handleToneChange(tone); // Re-trigger optimization
+                          }
+                        }}
+                        disabled={processing}
+                        className={`h-11 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1 ${
+                          formatting === f.name.toLowerCase()
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-white/80 active:scale-95 border border-purple-200'
+                        }`}
+                      >
+                        <span className="text-base">{f.emoji}</span>
+                        <span>{f.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Regenerate Button */}
               <button
                 onClick={() => handleOptimize()}
@@ -836,13 +887,14 @@ Requirements:
                 className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
-                <span>Regenerate with same tone</span>
+                <span>Regenerate with same settings</span>
               </button>
             </div>
 
             {/* Improvements Count */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-6">
               <div className="flex items-center justify-center gap-2">
+                <span className="text-lg">✅</span>
                 <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                 <span className="text-sm sm:text-base text-gray-900 font-semibold">
                   {result.improvements || 12} improvements made
@@ -855,6 +907,7 @@ Requirements:
               onClick={handleDownload}
               className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
             >
+              <span className="text-xl">💾</span>
               <Download className="w-5 h-5 sm:w-6 sm:h-6" /> 
               <span>Download Resume (DOCX)</span>
             </button>

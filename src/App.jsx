@@ -7,6 +7,7 @@ import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
 import { getCurrentUser, signOut } from './utils/auth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
+import Pricing from './pages/Pricing';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
 import LanguageSwitcher from './components/LanguageSwitcher';
 
@@ -21,7 +22,7 @@ export default function ClayApp() {
   const [error, setError] = useState(null);
   const [tone, setTone] = useState('professional');
   const [useCount, setUseCount] = useState(0);
-  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [showSignUpPage, setShowSignUpPage] = useState(false);
   const [user, setUser] = useState(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
@@ -37,6 +38,16 @@ export default function ClayApp() {
     }
     // Load weekly count
     setWeeklyCount(getWeeklyResumeCount());
+  }, []);
+
+  // Listen for sign up events from Pricing page
+  useEffect(() => {
+    const handleShowSignUp = () => {
+      setShowPricing(false);
+      setShowSignUpPage(true);
+    };
+    window.addEventListener('clay:showSignUp', handleShowSignUp);
+    return () => window.removeEventListener('clay:showSignUp', handleShowSignUp);
   }, []);
 
   const [isPro, setIsPro] = useState(user?.isPro || false);
@@ -97,12 +108,12 @@ export default function ClayApp() {
           'You\'ve used all 3 free optimizations! Sign up to unlock unlimited optimizations for just $7.99. Continue?'
         );
         if (shouldSignUp) {
-          setShowUpgrade(false);
+          setShowPricing(false);
           setShowSignUpPage(true);
           return;
         }
       } else {
-        setShowUpgrade(true);
+        setShowPricing(true);
         return;
       }
     }
@@ -212,7 +223,7 @@ export default function ClayApp() {
     // Check if tone is locked for free users
     const lockedTones = ['creative', 'technical', 'executive'];
     if (!isPro && lockedTones.includes(newTone.toLowerCase())) {
-      setShowUpgrade(true);
+      setShowPricing(true);
       return;
     }
     
@@ -253,7 +264,7 @@ export default function ClayApp() {
   const handleUpgrade = useCallback(async () => {
     // If user not signed in, redirect to sign up first
     if (!user) {
-      setShowUpgrade(false);
+      setShowPricing(false);
       // Store intent to upgrade after sign-up
       localStorage.setItem('clay_upgrade_after_signup', 'true');
       setShowSignUpPage(true);
@@ -272,7 +283,7 @@ export default function ClayApp() {
       const upgradedUser = { ...user, isPro: true };
       setUser(upgradedUser);
       localStorage.setItem('clay_current_user', JSON.stringify(upgradedUser));
-      setShowUpgrade(false);
+      setShowPricing(false);
       
       // In production, show error instead
       if (import.meta.env.VITE_STRIPE_PAYMENT_LINK) {
@@ -280,6 +291,23 @@ export default function ClayApp() {
       }
     }
   }, [user]);
+
+  // Show Pricing page if needed
+  if (showPricing) {
+    return (
+      <Pricing
+        user={user}
+        useCount={useCount}
+        freeUsesLeft={freeUsesLeft}
+        isPro={isPro}
+        onUpgrade={handleUpgrade}
+        onBack={() => {
+          setShowPricing(false);
+          localStorage.removeItem('clay_upgrade_after_signup');
+        }}
+      />
+    );
+  }
 
   // Show SignUp page if needed
   if (showSignUpPage) {
@@ -292,11 +320,11 @@ export default function ClayApp() {
           if (userData?.isPro) {
             setIsPro(true);
           }
-          // If user signed up with upgrade intent, show upgrade modal
+          // If user signed up with upgrade intent, show pricing page
           const upgradeAfterSignup = localStorage.getItem('clay_upgrade_after_signup');
           if (upgradeAfterSignup === 'true') {
             localStorage.removeItem('clay_upgrade_after_signup');
-            setShowUpgrade(true);
+            setShowPricing(true);
           }
         }}
         onBack={() => {
@@ -343,8 +371,8 @@ export default function ClayApp() {
               {!isPro && (
                 <button
                   onClick={() => {
-                    // Always show pricing modal - no sign-up required to view
-                    setShowUpgrade(true);
+                    // Always show pricing page - no sign-up required to view
+                    setShowPricing(true);
                   }}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all"
                 >
@@ -638,7 +666,7 @@ Requirements:
                     key={t.name}
                     onClick={() => {
                       if (t.locked) {
-                        setShowUpgrade(true);
+                        setShowPricing(true);
                       } else {
                         handleToneChange(t.name.toLowerCase());
                       }
@@ -662,7 +690,7 @@ Requirements:
               {!isPro && (
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   <button 
-                    onClick={() => setShowUpgrade(true)}
+                    onClick={() => setShowPricing(true)}
                     className="underline hover:text-gray-700"
                   >
                     Upgrade to Pro
@@ -774,157 +802,6 @@ Requirements:
         </div>
       </footer>
 
-      {/* Upgrade Modal */}
-      {showUpgrade && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl">
-            <div className="p-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-amber-600" />
-              </div>
-              
-              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
-                {useCount >= 3 && !isPro 
-                  ? 'Ready to keep going? 🚀'
-                  : 'Unlock Pro Features 💎'
-                }
-              </h2>
-              <p className="text-base text-gray-600 text-center mb-6">
-                {useCount >= 3 && !isPro
-                  ? <>You've used all 3 free optimizations. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
-                  : !user
-                  ? <>Get unlimited resume optimizations, all tone options, and priority AI processing for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
-                  : <>You have {freeUsesLeft} free optimization{freeUsesLeft !== 1 ? 's' : ''} left. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
-                }
-              </p>
-
-              {/* Pricing - Conversion Optimized */}
-              <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-white">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-4xl font-bold">$7.99</span>
-                      <span className="text-lg text-white/70 line-through">$19.99</span>
-                    </div>
-                    <div className="text-sm text-white/70">One-time payment · No subscription</div>
-                  </div>
-                  <div className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-full">
-                    60% OFF
-                  </div>
-                </div>
-                
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base">Unlimited resume optimizations</div>
-                      <div className="text-sm text-white/70">Optimize as many resumes as you need</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base">All tone options unlocked</div>
-                      <div className="text-sm text-white/70">Professional, Creative, Technical, Executive</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base">Priority AI processing</div>
-                      <div className="text-sm text-white/70">Faster results when you need them</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-base">Advanced ATS optimization</div>
-                      <div className="text-sm text-white/70">Deep keyword matching and formatting</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/20">
-                  <div className="flex items-center justify-center gap-4 text-xs text-white/60">
-                    <div className="flex items-center gap-1">
-                      <Lock className="w-3 h-3" />
-                      <span>Secure payment</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      <span>Instant access</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {!user && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                  <p className="text-sm text-blue-900 text-center">
-                    <strong>Sign up</strong> (30 seconds) or continue below to upgrade
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <button
-                  onClick={handleUpgrade}
-                  className="w-full h-16 bg-gray-900 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl"
-                >
-                  <Zap className="w-6 h-6" />
-                  {user ? 'Upgrade to Pro — $7.99' : 'Get Pro — $7.99'}
-                </button>
-                {!user && (
-                  <button
-                    onClick={() => {
-                      setShowUpgrade(false);
-                      setShowSignUpPage(true);
-                    }}
-                    className="w-full h-12 bg-gray-100 text-gray-900 rounded-xl font-semibold text-base hover:bg-gray-200 active:scale-[0.98] transition-all"
-                  >
-                    Sign up first (free)
-                  </button>
-                )}
-              </div>
-
-              <button
-                onClick={() => setShowUpgrade(false)}
-                className="w-full py-3 text-gray-600 font-medium text-sm hover:text-gray-900 transition-colors"
-              >
-                Continue with free account
-              </button>
-
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <p className="text-center text-xs text-gray-500 mb-3">
-                  Powered by Stripe · Secure payment processing
-                </p>
-                <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-gray-400" />
-                    <span>Encrypted</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Check className="w-3 h-3 text-gray-400" />
-                    <span>No subscription</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-gray-400" />
-                    <span>Instant access</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

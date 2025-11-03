@@ -1,0 +1,229 @@
+import { useState } from 'react';
+import { ArrowLeft, Zap, Check, Lock, Star } from 'lucide-react';
+
+export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUsesLeft = 3, isPro = false }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgradeClick = async () => {
+    setLoading(true);
+    try {
+      await onUpgrade();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasUsedAllFree = useCount >= 3 && !isPro;
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40">
+        <div className="px-4 py-3 flex items-center justify-between max-w-2xl mx-auto">
+          <button 
+            onClick={onBack}
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 active:scale-95 transition-all"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
+          </button>
+          <span className="text-xl font-bold text-gray-900">Clay Pro</span>
+          <div className="w-9" /> {/* Spacer */}
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-4 py-8 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-amber-600" />
+          </div>
+          
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
+            {hasUsedAllFree 
+              ? 'Ready to keep going? 🚀'
+              : 'Unlock Pro Features 💎'
+            }
+          </h1>
+          
+          <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto leading-relaxed">
+            {hasUsedAllFree
+              ? 'You\'ve used all 3 free optimizations. Unlock unlimited optimizations for just $7.99 — one payment, yours forever.'
+              : !user
+              ? 'Get unlimited resume optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever.'
+              : `You have ${freeUsesLeft} free optimization${freeUsesLeft !== 1 ? 's' : ''} left. Unlock unlimited optimizations for just $7.99 — one payment, yours forever.`
+            }
+          </p>
+        </div>
+
+        {/* Pricing Card */}
+        <div className="bg-gray-900 rounded-3xl p-6 sm:p-8 mb-6 text-white shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-5xl sm:text-6xl font-bold">$7.99</span>
+                <span className="text-xl sm:text-2xl text-white/70 line-through">$19.99</span>
+              </div>
+              <div className="text-sm sm:text-base text-white/70">One-time payment · No subscription</div>
+            </div>
+            <div className="px-4 py-2 bg-green-500 text-white text-sm sm:text-base font-bold rounded-full whitespace-nowrap">
+              60% OFF
+            </div>
+          </div>
+          
+          {/* Features List */}
+          <div className="space-y-4 sm:space-y-5 mb-6 sm:mb-8">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-base sm:text-lg mb-1">Unlimited resume optimizations</div>
+                <div className="text-sm sm:text-base text-white/70">Optimize as many resumes as you need</div>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-base sm:text-lg mb-1">All tone options unlocked</div>
+                <div className="text-sm sm:text-base text-white/70">Professional, Creative, Technical, Executive</div>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-base sm:text-lg mb-1">Priority AI processing</div>
+                <div className="text-sm sm:text-base text-white/70">Faster results when you need them</div>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-base sm:text-lg mb-1">Advanced ATS optimization</div>
+                <div className="text-sm sm:text-base text-white/70">Deep keyword matching and formatting</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="pt-6 border-t border-white/20">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-white/60">
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-4 h-4" />
+                <span>Secure payment</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4" />
+                <span>Instant access</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check className="w-4 h-4" />
+                <span>No subscription</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sign Up Notice */}
+        {!user && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-5 mb-6">
+            <p className="text-sm sm:text-base text-blue-900 text-center font-medium">
+              <strong>Sign up</strong> (30 seconds) or continue below to upgrade
+            </p>
+          </div>
+        )}
+
+        {/* CTA Buttons */}
+        <div className="space-y-3 sm:space-y-4">
+          <button
+            onClick={handleUpgradeClick}
+            disabled={loading}
+            className="w-full h-16 sm:h-20 bg-gray-900 text-white rounded-2xl font-bold text-lg sm:text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-6 h-6 sm:w-7 sm:h-7" />
+                <span>{user ? 'Upgrade to Pro — $7.99' : 'Get Pro — $7.99'}</span>
+              </>
+            )}
+          </button>
+          
+          {!user && (
+            <button
+              onClick={() => {
+                // Store upgrade intent and trigger sign up
+                localStorage.setItem('clay_upgrade_after_signup', 'true');
+                onBack();
+                // Parent will handle showing sign up page
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('clay:showSignUp', { detail: { fromPricing: true } }));
+                }, 100);
+              }}
+              className="w-full h-14 bg-gray-100 text-gray-900 rounded-xl font-semibold text-base hover:bg-gray-200 active:scale-[0.98] transition-all"
+            >
+              Sign up first (free)
+            </button>
+          )}
+        </div>
+
+        {/* Social Proof */}
+        <div className="mt-8 sm:mt-12 bg-amber-50 rounded-2xl p-6 border border-amber-200">
+          <div className="flex items-center gap-1 mb-3 justify-center">
+            {[1,2,3,4,5].map(i => (
+              <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
+            ))}
+          </div>
+          <p className="text-sm sm:text-base text-gray-900 text-center font-semibold mb-2">
+            "Got 3 interviews in a week after using Clay!"
+          </p>
+          <p className="text-xs sm:text-sm text-gray-600 text-center">— Marcus L., Product Manager</p>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-gray-500 mb-3">
+              Powered by Stripe · Secure payment processing
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-gray-400" />
+                <span>Encrypted</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-gray-400" />
+                <span>No subscription</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-gray-400" />
+                <span>Instant access</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary CTA */}
+        <button
+          onClick={onBack}
+          className="mt-6 w-full py-3 text-gray-600 font-medium text-sm sm:text-base hover:text-gray-900 transition-colors"
+        >
+          Continue with free account
+        </button>
+      </div>
+    </div>
+  );
+}
+

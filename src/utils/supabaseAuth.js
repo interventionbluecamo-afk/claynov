@@ -205,3 +205,73 @@ export async function setUserAsPro(userId) {
   return updateUserProfile(userId, { is_pro: true });
 }
 
+/**
+ * Get user's use count from database
+ */
+export async function getUserUseCount(userId) {
+  if (!isSupabaseConfigured() || !userId) {
+    // Fallback to localStorage
+    const savedCount = localStorage.getItem('clay_use_count');
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  }
+
+  try {
+    const profile = await getUserProfile(userId);
+    return profile?.use_count || 0;
+  } catch (error) {
+    console.error('Error fetching use count:', error);
+    // Fallback to localStorage
+    const savedCount = localStorage.getItem('clay_use_count');
+    return savedCount ? parseInt(savedCount, 10) : 0;
+  }
+}
+
+/**
+ * Increment user's use count
+ */
+export async function incrementUseCount(userId) {
+  if (!isSupabaseConfigured() || !userId) {
+    // Fallback to localStorage
+    const currentCount = parseInt(localStorage.getItem('clay_use_count') || '0', 10);
+    const newCount = currentCount + 1;
+    localStorage.setItem('clay_use_count', newCount.toString());
+    return newCount;
+  }
+
+  try {
+    const profile = await getUserProfile(userId);
+    const currentCount = profile?.use_count || 0;
+    const newCount = currentCount + 1;
+    
+    await updateUserProfile(userId, { use_count: newCount });
+    return newCount;
+  } catch (error) {
+    console.error('Error incrementing use count:', error);
+    // Fallback to localStorage
+    const currentCount = parseInt(localStorage.getItem('clay_use_count') || '0', 10);
+    const newCount = currentCount + 1;
+    localStorage.setItem('clay_use_count', newCount.toString());
+    return newCount;
+  }
+}
+
+/**
+ * Reset use count (e.g., when user upgrades to Pro)
+ */
+export async function resetUseCount(userId) {
+  if (!isSupabaseConfigured() || !userId) {
+    localStorage.removeItem('clay_use_count');
+    return 0;
+  }
+
+  try {
+    await updateUserProfile(userId, { use_count: 0 });
+    localStorage.removeItem('clay_use_count'); // Also clear localStorage
+    return 0;
+  } catch (error) {
+    console.error('Error resetting use count:', error);
+    localStorage.removeItem('clay_use_count');
+    return 0;
+  }
+}
+

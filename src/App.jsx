@@ -4,7 +4,7 @@ import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
-import { getCurrentUser, signOut } from './utils/supabaseAuth';
+import { getCurrentUser, signOut, getUserUseCount, incrementUseCount, resetUseCount } from './utils/supabaseAuth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
@@ -37,13 +37,65 @@ export default function ClayApp() {
     const loadUser = async () => {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      // Load use count from localStorage
-      const savedCount = localStorage.getItem('clay_use_count');
-      if (savedCount) {
-        setUseCount(parseInt(savedCount, 10));
+      
+      // Load use count from Supabase (or localStorage fallback)
+      if (currentUser?.id) {
+        try {
+          const count = await getUserUseCount(currentUser.id);
+          setUseCount(count);
+          // Sync to localStorage for backward compatibility
+          localStorage.setItem('clay_use_count', count.toString());
+        } catch (error) {
+          console.error('Error loading use count:', error);
+          // Fallback to localStorage
+          const savedCount = localStorage.getItem('clay_use_count');
+          if (savedCount) {
+            setUseCount(parseInt(savedCount, 10));
+          }
+        }
+      } else {
+        // No user, use localStorage
+        const savedCount = localStorage.getItem('clay_use_count');
+        if (savedCount) {
+          setUseCount(parseInt(savedCount, 10));
+        }
       }
+      
       // Load weekly count
       setWeeklyCount(getWeeklyResumeCount());
+      
+      // Check for pending payment upgrade
+      const pendingEmail = localStorage.getItem('clay_pending_upgrade_email');
+      const pendingTimestamp = localStorage.getItem('clay_pending_upgrade_timestamp');
+      
+      if (pendingEmail && pendingTimestamp && currentUser?.email === pendingEmail) {
+        // Payment was initiated less than 24 hours ago
+        const timestamp = parseInt(pendingTimestamp, 10);
+        const hoursSincePayment = (Date.now() - timestamp) / (1000 * 60 * 60);
+        
+        if (hoursSincePayment < 24) {
+          // Show message that payment is being processed
+          toast.info('Payment processing... We\'ll upgrade your account shortly!');
+          
+          // In production, you would:
+          // 1. Check Stripe API for payment status
+          // 2. Or wait for webhook to update user
+          // 3. For MVP, you can manually verify in Stripe dashboard
+          
+          // Clear the flags after 5 minutes (give time for webhook)
+          if (hoursSincePayment < 0.1) { // Less than 6 minutes
+            // Keep checking - don't clear yet
+          } else {
+            // After 24 hours, clear the pending flag
+            localStorage.removeItem('clay_pending_upgrade_email');
+            localStorage.removeItem('clay_pending_upgrade_timestamp');
+          }
+        } else {
+          // Timed out - clear pending
+          localStorage.removeItem('clay_pending_upgrade_email');
+          localStorage.removeItem('clay_pending_upgrade_timestamp');
+        }
+      }
     };
     loadUser();
   }, []);
@@ -61,9 +113,21 @@ export default function ClayApp() {
   const [isPro, setIsPro] = useState(user?.isPro || false);
   const freeUsesLeft = Math.max(0, 3 - useCount);
 
-  // Update isPro when user changes
+  // Update isPro when user changes, and reset use count if upgraded
   useEffect(() => {
-    setIsPro(user?.isPro || false);
+    const wasPro = isPro;
+    const nowPro = user?.isPro || false;
+    setIsPro(nowPro);
+    
+    // If user just upgraded to Pro, reset their use count
+    if (!wasPro && nowPro && user?.id) {
+      resetUseCount(user.id).then(() => {
+        setUseCount(0);
+        localStorage.removeItem('clay_use_count');
+      }).catch(error => {
+        console.error('Error resetting use count after upgrade:', error);
+      });
+    }
   }, [user]);
 
   const handleFileUpload = useCallback(async (e) => {
@@ -292,21 +356,13 @@ export default function ClayApp() {
       redirectToStripePayment(user);
       toast.info('Redirecting to secure payment...');
     } catch (error) {
-      // Fallback: Show upgrade success (for demo/testing)
-      console.warn('Stripe not configured, using demo mode:', error.message);
-      const upgradedUser = { ...user, isPro: true };
-      setUser(upgradedUser);
-      localStorage.setItem('clay_current_user', JSON.stringify(upgradedUser));
-      setShowPricing(false);
-      toast.success('Upgraded to Pro! 🎉');
+      // Stripe not configured yet - show helpful message
+      console.warn('Stripe not configured:', error.message);
+      const errorMsg = 'Payment system is being set up. Please try again in a few minutes or contact support.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       
-      // In production, show error instead
-      if (import.meta.env.VITE_STRIPE_PAYMENT_LINK) {
-        const errorMsg = 'Payment processing failed. Please try again or contact support.';
-        setError(errorMsg);
-        toast.error(errorMsg);
-        throw error;
-      }
+      // Don't auto-upgrade in production - require actual payment
     }
   }, [user]);
 

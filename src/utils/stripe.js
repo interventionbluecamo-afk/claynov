@@ -78,13 +78,16 @@ export function redirectToStripePayment(userData) {
     throw new Error('Stripe payment link not configured. Please set VITE_STRIPE_PAYMENT_LINK in your environment variables.');
   }
 
-  // Store user email in localStorage for post-payment verification
+  // Store user email and ID in localStorage for post-payment verification
   if (userData?.email) {
     localStorage.setItem('clay_pending_upgrade_email', userData.email);
+    localStorage.setItem('clay_pending_upgrade_user_id', userData.id || '');
     localStorage.setItem('clay_pending_upgrade_timestamp', Date.now().toString());
   }
 
   // Redirect to Stripe Payment Link
+  // Note: Make sure your Stripe Payment Link has a return URL set to your app
+  // e.g., https://yourdomain.com?payment=success
   window.location.href = paymentLink;
 }
 

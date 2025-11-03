@@ -498,88 +498,77 @@ Requirements:
         </div>
       )}
 
-      {/* Step 3: Results - Completely Redesigned for Impact */}
+      {/* Step 3: Results - Clean & Focused */}
       {step === 3 && result && (
-        <div className="flex-1 flex flex-col pb-24 max-w-3xl mx-auto w-full">
-          {/* Hero Success Section */}
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white px-4 sm:px-6 py-10 sm:py-14 text-center">
-            <div className="w-20 h-20 bg-white/10 backdrop-blur rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <Check className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold mb-3 tracking-tight">Your resume is ready! 🎉</h1>
-            <p className="text-lg sm:text-xl text-white/80 mb-8">Optimized and ready to land that interview</p>
-            
-            {/* Big Impact Stats */}
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                <div className="text-4xl sm:text-5xl font-bold mb-1">{result.ats}</div>
-                <div className="text-sm text-white/70">ATS Score</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                <div className="text-4xl sm:text-5xl font-bold mb-1">{result.match}</div>
-                <div className="text-sm text-white/70">Match %</div>
+        <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full bg-white">
+          {/* Success Banner */}
+          <div className="bg-gray-900 px-4 sm:px-6 py-8 sm:py-10">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                    <Check className="w-6 h-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white">All set! 🎉</h1>
+                </div>
+                <p className="text-white/70 text-base">Your resume is optimized and ready to download</p>
               </div>
             </div>
 
-            {/* Primary CTA */}
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+                <div className="text-3xl font-bold text-white mb-0.5">{result.ats}</div>
+                <div className="text-xs text-white/60">ATS Score</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+                <div className="text-3xl font-bold text-white mb-0.5">{result.match}%</div>
+                <div className="text-xs text-white/60">Job Match</div>
+              </div>
+            </div>
+
+            {/* Download CTA */}
             <button 
               onClick={handleDownload}
-              className="w-full max-w-md mx-auto h-16 bg-white text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all mb-4"
+              className="w-full h-14 bg-white text-gray-900 rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:bg-gray-100 active:scale-[0.98] transition-all"
             >
-              <Download className="w-6 h-6" /> 
+              <Download className="w-5 h-5" /> 
               <span>Download Resume</span>
             </button>
-            <p className="text-sm text-white/60">DOCX format · Instant download</p>
           </div>
 
-          {/* Content Section */}
-          <div className="px-4 sm:px-6 py-8 -mt-6 relative z-10">
-            {/* Preview Card - The Main Focus */}
-            <div className="bg-white rounded-3xl border-2 border-gray-200 shadow-xl overflow-hidden mb-6">
-              <div className="bg-gray-900 px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-white" />
-                  <span className="text-base font-bold text-white">Your Optimized Resume</span>
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
+            {/* Full Preview */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-semibold text-gray-900">Preview</span>
                 </div>
-                <span className="text-xs text-white/70 hidden sm:inline">Scroll to view</span>
               </div>
-              <div className="p-5 sm:p-7 max-h-[50vh] sm:max-h-[600px] overflow-y-auto bg-white">
-                <pre className="whitespace-pre-wrap text-sm sm:text-base font-sans text-gray-800 leading-relaxed font-medium">
+              <div className="p-4 sm:p-6 max-h-[55vh] overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 font-sans">
                   {result.optimizedText}
                 </pre>
               </div>
-              <div className="bg-gray-50 px-5 py-4 border-t border-gray-200 flex items-center justify-between">
-                <span className="text-xs text-gray-500">{result.improvements || result.changes?.length || 12} improvements made</span>
-                <button 
-                  onClick={handleDownload}
-                  className="h-10 px-6 bg-gray-900 text-white rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-gray-800 active:scale-95 transition-all"
-                >
-                  <Download className="w-4 h-4" /> 
-                  <span>Download</span>
-                </button>
-              </div>
             </div>
 
-            {/* Tone Adjuster - Compact */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 mb-6 shadow-sm">
+            {/* Tone Switcher */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-900">Try different tone</span>
-                {processing && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Updating...</span>
-                  </div>
-                )}
+                <span className="text-sm font-semibold text-gray-900">Tone</span>
+                {processing && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div className="grid grid-cols-2 gap-2">
                 {['Professional', 'Creative', 'Technical', 'Executive'].map(t => (
                   <button 
                     key={t}
                     onClick={() => handleToneChange(t.toLowerCase())}
                     disabled={processing}
-                    className={`px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-50 flex-shrink-0 ${
+                    className={`py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
                       tone === t.toLowerCase()
-                        ? 'bg-gray-900 text-white shadow-md'
+                        ? 'bg-gray-900 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
                     }`}
                   >
@@ -589,26 +578,55 @@ Requirements:
               </div>
             </div>
 
+            {/* Improvements List */}
+            {result.changes && result.changes.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-gray-900">Key improvements</span>
+                </div>
+                <div className="space-y-2.5">
+                  {result.changes.slice(0, 4).map((change, idx) => (
+                    <div key={idx} className="flex gap-2 text-sm">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 leading-relaxed">{change}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Social Proof */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 sm:p-6 border border-amber-200 mb-6 shadow-sm">
-              <div className="flex items-center justify-center gap-1 mb-3">
+            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+              <div className="flex items-center gap-1 mb-2 justify-center">
                 {[1,2,3,4,5].map(i => (
-                  <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-base sm:text-lg text-gray-900 text-center mb-2 font-semibold">
-                "Got 3 interviews in a week. This tool is incredible." 🚀
+              <p className="text-sm text-gray-900 text-center font-medium mb-1">
+                "Got 3 interviews in a week!"
               </p>
-              <p className="text-sm text-gray-600 text-center">— Marcus L., Product Manager</p>
+              <p className="text-xs text-gray-600 text-center">— Marcus L., Product Manager</p>
             </div>
 
-            {/* Secondary Action */}
+            {/* Secondary CTA */}
             <button 
               onClick={handleReset}
-              className="w-full h-14 bg-white text-gray-700 rounded-2xl font-semibold text-base border-2 border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all shadow-sm"
+              className="w-full h-12 bg-white text-gray-700 rounded-xl font-medium text-sm border-2 border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all"
             >
-              <RefreshCw className="w-5 h-5" /> 
-              <span>Optimize Another Resume</span>
+              <RefreshCw className="w-4 h-4" /> 
+              <span>Optimize Another</span>
+            </button>
+          </div>
+
+          {/* Fixed Bottom Download */}
+          <div className="border-t bg-white p-4">
+            <button 
+              onClick={handleDownload}
+              className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+            >
+              <Download className="w-5 h-5" /> 
+              <span>Download Resume (DOCX)</span>
             </button>
           </div>
         </div>

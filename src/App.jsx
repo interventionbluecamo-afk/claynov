@@ -50,7 +50,10 @@ export default function ClayApp() {
           const bypassUser = { ...user, isPro: true };
           setUser(bypassUser);
           setIsPro(true);
-          toast.success('Dev bypass enabled - Pro features unlocked 🛠️');
+          // Also reset use count for testing
+          setUseCount(0);
+          localStorage.removeItem('clay_use_count');
+          toast.success('Dev bypass enabled - Pro features unlocked & use count reset 🛠️');
         } else if (newBypass) {
           toast.success('Dev bypass enabled - Sign in to activate 🛠️');
         } else {
@@ -62,6 +65,18 @@ export default function ClayApp() {
           }
           toast.info('Dev bypass disabled');
         }
+      }
+      
+      // Also add reset use count shortcut: Ctrl/Cmd + Shift + R
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        setUseCount(0);
+        localStorage.removeItem('clay_use_count');
+        // Also reset in Supabase if signed in
+        if (user?.id) {
+          resetUseCount(user.id).catch(err => console.error('Error resetting in Supabase:', err));
+        }
+        toast.success('Use count reset to 0! Refresh to see changes 🎉');
       }
     };
     

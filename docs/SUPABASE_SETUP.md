@@ -10,12 +10,15 @@ Set up real user accounts with secure authentication, replacing the localStorage
 
 ## Step 1: Create Supabase Account (5 min)
 
-1. **Go to** [https://supabase.com](https://supabase.com)
+1. **Go directly to** [https://supabase.com/dashboard](https://supabase.com/dashboard)
+   - ⚠️ **Avoid** links that mention Vercel - they redirect to Vercel integration
+   - **Direct signup**: [https://supabase.com/dashboard/sign-up](https://supabase.com/dashboard/sign-up)
 2. **Click** "Start your project" or "Sign Up"
 3. **Sign up** with:
    - GitHub (easiest) OR
    - Email + password
 4. **Verify your email** if using email signup
+5. **If it redirects to Vercel**: Close that tab, manually type `supabase.com/dashboard` in browser
 
 ---
 

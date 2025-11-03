@@ -10,9 +10,11 @@
 ## What You Need to Do (Human Actions - ~15 min)
 
 ### 1️⃣ Create Supabase Account (2 min)
-- Go to: https://supabase.com
-- Click "Start your project"
+- Go to: https://supabase.com/dashboard
+- Click "Start your project" (big green button)
+- **OR** go directly to signup: https://supabase.com/dashboard/sign-up
 - Sign up with GitHub (easiest) or email
+- ⚠️ **If it redirects to Vercel**: Close that tab and go directly to https://supabase.com/dashboard
 - Verify email if needed
 
 ### 2️⃣ Create Project (3 min)

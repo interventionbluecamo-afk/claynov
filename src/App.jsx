@@ -4,7 +4,7 @@ import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
-import { getCurrentUser, signOut, signIn, signUp } from './utils/auth';
+import { getCurrentUser, signOut } from './utils/auth';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);

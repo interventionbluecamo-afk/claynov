@@ -365,9 +365,9 @@ export default function ClayApp() {
                 {formatWeeklyCount(weeklyCount)} resumes optimized this week
               </div>
               <h1 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-                Get more interviews
+                Land any job
               </h1>
-              <p className="text-xl text-gray-600">Tailor your resume in 30 seconds ⚡</p>
+              <p className="text-xl text-gray-600">Tailor your resume with AI ⚡</p>
             </div>
 
             <div className="w-full max-w-md mx-auto">
@@ -523,47 +523,47 @@ Requirements:
       {/* Step 3: Results - Redesigned for better UX and conversion */}
       {step === 3 && result && (
         <div className="flex-1 flex flex-col pb-32 max-w-4xl mx-auto w-full">
-          {/* Compact Success Header */}
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white px-4 sm:px-6 py-6 sm:py-8">
+          {/* Compact Success Header - Consistent with app */}
+          <div className="bg-white px-4 sm:px-6 py-6 sm:py-8 border-b border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Check className="w-5 h-5 text-green-400" />
-                  <h2 className="text-2xl sm:text-3xl font-bold">Resume optimized! 🎉</h2>
+                  <Check className="w-5 h-5 text-green-600" />
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Resume optimized! 🎉</h2>
                 </div>
-                <p className="text-sm sm:text-base text-white/70">Ready to download and apply</p>
+                <p className="text-sm sm:text-base text-gray-600">Ready to download and apply</p>
               </div>
               <div className="flex flex-col items-end gap-1">
                 <div className="text-right">
-                  <div className="text-2xl sm:text-3xl font-bold">{result.ats}</div>
-                  <div className="text-xs text-white/60">ATS</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900">{result.ats}</div>
+                  <div className="text-xs text-gray-600">ATS Score</div>
                 </div>
               </div>
             </div>
             
-            {/* Compact Stats Row */}
+            {/* Compact Stats Row - White cards like rest of app */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{result.match}</div>
-                <div className="text-xs text-white/70">Match</div>
+              <div className="bg-white rounded-xl p-3 sm:p-4 text-center border border-gray-200 shadow-sm">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5">{result.match}</div>
+                <div className="text-xs text-gray-600">Match</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{result.improvements || result.changes?.length || 12}</div>
-                <div className="text-xs text-white/70">Changes</div>
+              <div className="bg-white rounded-xl p-3 sm:p-4 text-center border border-gray-200 shadow-sm">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5">{result.improvements || result.changes?.length || 12}</div>
+                <div className="text-xs text-gray-600">Changes</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">✨</div>
-                <div className="text-xs text-white/70">Optimized</div>
+              <div className="bg-white rounded-xl p-3 sm:p-4 text-center border border-gray-200 shadow-sm">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5">✨</div>
+                <div className="text-xs text-gray-600">Optimized</div>
               </div>
             </div>
           </div>
 
           <div className="px-4 sm:px-6 py-6 space-y-4">
-            {/* Primary CTA - Prominent and Early */}
-            <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
+            {/* Primary CTA - Clean white card */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm">
               <button 
                 onClick={handleDownload}
-                className="w-full h-14 bg-gray-900 text-white rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg hover:bg-gray-800"
+                className="w-full h-14 bg-gray-900 text-white rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-gray-800"
               >
                 <Download className="w-5 h-5" /> 
                 <span>Download Optimized Resume</span>
@@ -600,14 +600,14 @@ Requirements:
               </div>
             </div>
 
-            {/* Preview - Hero Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gray-900 px-4 sm:px-5 py-3 flex items-center justify-between">
+            {/* Preview - Consistent styling */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-4 sm:px-5 py-3 flex items-center justify-between border-b border-gray-200">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-white" />
-                  <span className="text-sm font-semibold text-white">Preview Your Optimized Resume</span>
+                  <FileText className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-semibold text-gray-900">Preview Your Optimized Resume</span>
                 </div>
-                <span className="text-xs text-white/70 hidden sm:inline">Scroll to review</span>
+                <span className="text-xs text-gray-500 hidden sm:inline">Scroll to review</span>
               </div>
               <div className="p-4 sm:p-6 max-h-[60vh] sm:max-h-[500px] overflow-y-auto bg-white">
                 <pre className="whitespace-pre-wrap text-xs sm:text-sm font-sans text-gray-800 leading-relaxed">
@@ -625,8 +625,8 @@ Requirements:
               </div>
             </div>
 
-            {/* Social Proof - Build Confidence */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-5 border border-amber-200">
+            {/* Social Proof - Consistent gray theme */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm">
               <div className="flex items-center justify-center gap-1 mb-2">
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />

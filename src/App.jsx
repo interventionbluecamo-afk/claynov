@@ -963,17 +963,6 @@ Requirements:
               </button>
             </div>
 
-            {/* Improvements Count */}
-            <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-6">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-lg">✅</span>
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-                <span className="text-sm sm:text-base text-gray-900 font-semibold">
-                  {result.improvements || 12} improvements made
-                </span>
-              </div>
-            </div>
-
             {/* Primary Download CTA */}
             <button 
               onClick={handleDownload}

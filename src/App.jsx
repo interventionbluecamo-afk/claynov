@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Sparkles, FileText, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2, LogOut, Upload, Download, RefreshCw, ChevronLeft, ChevronDown, ChevronUp, Zap, MessageSquare } from 'lucide-react';
+import { Sparkles, FileText, ArrowRight, Check, TrendingUp, Star, Lock, X, Loader2, LogOut, Upload, Download, RefreshCw, ChevronLeft, ChevronDown, ChevronUp, Zap, MessageSquare, Target, Shield, Search } from 'lucide-react';
 import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
@@ -10,6 +10,8 @@ import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
 import { getRandomTrustSignal, getTrustSignals } from './utils/trustSignals';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -773,6 +775,70 @@ export default function ClayApp() {
             </div>
           </div>
 
+          {/* Feature Highlights Section */}
+          <div className="py-12 sm:py-16 bg-gradient-to-b from-white to-gray-50">
+            <div className="max-w-4xl mx-auto px-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-10">
+                {/* Feature 1: ATS Optimization */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                    <Target className="w-7 h-7 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Beat ATS Systems</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Our AI optimizes your resume to pass Applicant Tracking Systems with keyword matching and ATS-friendly formatting.
+                  </p>
+                </div>
+
+                {/* Feature 2: Job Matching */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                    <Search className="w-7 h-7 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Perfect Job Match</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Tailor your resume for each job description. Our AI analyzes requirements and aligns your experience perfectly.
+                  </p>
+                </div>
+
+                {/* Feature 3: Privacy & Security */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                    <Shield className="w-7 h-7 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">100% Private</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Your resume stays on your device. We never store your personal information or resume content.
+                  </p>
+                </div>
+
+                {/* Feature 4: Instant Results */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-4">
+                    <Zap className="w-7 h-7 text-amber-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Instant Optimization</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Get your optimized resume in seconds. No waiting, no delays—just upload, paste, and download.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA to Scroll to Top */}
+              <div className="text-center">
+                <button
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 active:scale-95 transition-all shadow-md"
+                >
+                  <ArrowRight className="w-4 h-4 rotate-[-90deg]" />
+                  <span>Start optimizing your resume</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {resumeFile && !uploading && (
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
               <div className="max-w-2xl mx-auto">
@@ -1382,18 +1448,43 @@ Requirements:
       {/* Footer */}
       <footer className="border-t bg-white">
         <div className="max-w-2xl mx-auto px-4 py-6">
-          <p className="text-center text-sm text-gray-500">
-            Made with <span className="text-red-500">♥</span> by{' '}
-            <a 
-              href="https://roundtripux.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
-            >
-              roundtrip ux
-            </a>
-            {' '}· Free forever
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-sm text-gray-500">
+            <p className="text-center">
+              Made with <span className="text-red-500">♥</span> by{' '}
+              <a 
+                href="https://roundtripux.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
+              >
+                roundtrip ux
+              </a>
+            </p>
+            <span className="hidden sm:inline">·</span>
+            <div className="flex items-center gap-3">
+              <a 
+                href="/terms" 
+                className="text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowTerms(true);
+                }}
+              >
+                Terms
+              </a>
+              <span className="text-gray-400">·</span>
+              <a 
+                href="/privacy" 
+                className="text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPrivacy(true);
+                }}
+              >
+                Privacy
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
 

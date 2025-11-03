@@ -22,7 +22,8 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
         <div className="px-4 py-3 flex items-center justify-between max-w-2xl mx-auto">
           <button 
             onClick={onBack}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 active:scale-95 transition-all"
+            className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-gray-100 active:scale-95 transition-all"
+            aria-label="Go back"
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
@@ -164,13 +165,13 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
           {!user && (
             <button
               onClick={() => {
-                // Store upgrade intent and trigger sign up
+                // Store upgrade intent and trigger sign up via callback
                 localStorage.setItem('clay_upgrade_after_signup', 'true');
                 onBack();
-                // Parent will handle showing sign up page
-                setTimeout(() => {
+                // Use requestAnimationFrame for proper React state update timing
+                requestAnimationFrame(() => {
                   window.dispatchEvent(new CustomEvent('clay:showSignUp', { detail: { fromPricing: true } }));
-                }, 100);
+                });
               }}
               className="w-full h-14 bg-gray-100 text-gray-900 rounded-xl font-semibold text-base hover:bg-gray-200 active:scale-[0.98] transition-all"
             >

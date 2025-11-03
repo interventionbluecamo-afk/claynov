@@ -10,7 +10,7 @@ import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
-import LanguageSwitcher from './components/LanguageSwitcher';
+import { getRandomTrustSignal, getTrustSignals } from './utils/trustSignals';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer, toast } from './components/Toast';
 import StepProgress from './components/StepProgress';
@@ -195,6 +195,23 @@ export default function ClayApp() {
 
     setProcessing(true);
     setError(null);
+    
+    // Initialize trust signals for this optimization
+    const signals = getTrustSignals(3);
+    setCurrentTrustSignal(signals[0]);
+    setTrustSignalIndex(0);
+    
+    // Cycle through trust signals every 3 seconds during processing
+    const signalInterval = setInterval(() => {
+      setTrustSignalIndex(prev => {
+        const nextIndex = (prev + 1) % signals.length;
+        setCurrentTrustSignal(signals[nextIndex]);
+        return nextIndex;
+      });
+    }, 3000);
+    
+    // Store interval ID to clear later
+    window.clayTrustSignalInterval = signalInterval;
 
     try {
       const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
@@ -283,9 +300,16 @@ export default function ClayApp() {
         console.error('Mock API also failed:', mockErr);
       }
     } finally {
+      // Clear trust signal interval
+      if (window.clayTrustSignalInterval) {
+        clearInterval(window.clayTrustSignalInterval);
+        window.clayTrustSignalInterval = null;
+      }
       setProcessing(false);
+      setCurrentTrustSignal(null);
+      setTrustSignalIndex(0);
     }
-  }, [resumeText, jobDesc, tone, useCount, isPro]);
+  }, [resumeText, jobDesc, tone, useCount, isPro, user]);
 
   const handleDownload = useCallback(async () => {
     if (!result?.optimizedText) {
@@ -516,7 +540,7 @@ export default function ClayApp() {
 
       {/* Step Progress Indicator - Only show when in flow (step 1-3) */}
       {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && !showProfile && (
-        <div className="border-b bg-white">
+        <div className="border-b bg-white sticky top-[57px] z-30">
           <StepProgress currentStep={step} />
         </div>
       )}
@@ -876,16 +900,18 @@ Requirements:
         </div>
       )}
 
-      {/* Loading Overlay */}
+      {/* Loading Overlay with Trust Signals */}
       {processing && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-3xl p-8 max-w-sm mx-4 text-center">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-8 h-8 text-gray-900 animate-pulse" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Optimizing your resume ✨</h3>
-            <p className="text-sm text-gray-600 mb-4">AI is analyzing and rewriting...</p>
-            <div className="space-y-2 text-left text-xs text-gray-500">
+            <p className="text-sm text-gray-600 mb-6">AI is analyzing and rewriting...</p>
+            
+            {/* Progress Steps */}
+            <div className="space-y-2 text-left text-xs text-gray-500 mb-6">
               <div className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-green-500" />
                 <span>Analyzing job requirements</span>
@@ -899,6 +925,21 @@ Requirements:
                 <span>Rewriting for impact...</span>
               </div>
             </div>
+            
+            {/* Trust Signal / Fun Fact */}
+            {currentTrustSignal && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200 mb-4 animate-in fade-in">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-2xl">{currentTrustSignal.icon}</span>
+                  <div className="text-2xl font-bold text-gray-900">{currentTrustSignal.stat}</div>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-700 font-medium leading-relaxed">
+                  {currentTrustSignal.text}
+                </p>
+              </div>
+            )}
+            
+            <p className="text-xs text-gray-400 mt-4">This usually takes 10-30 seconds...</p>
           </div>
         </div>
       )}
@@ -906,21 +947,18 @@ Requirements:
       {/* Footer */}
       <footer className="border-t bg-white">
         <div className="max-w-2xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-center text-sm text-gray-500">
-              Made with <span className="text-red-500">♥</span> by{' '}
-              <a 
-                href="https://roundtripux.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
-              >
-                roundtrip ux
-              </a>
-              {' '}· Free forever
-            </p>
-            <LanguageSwitcher />
-          </div>
+          <p className="text-center text-sm text-gray-500">
+            Made with <span className="text-red-500">♥</span> by{' '}
+            <a 
+              href="https://roundtripux.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
+            >
+              roundtrip ux
+            </a>
+            {' '}· Free forever
+          </p>
         </div>
       </footer>
 

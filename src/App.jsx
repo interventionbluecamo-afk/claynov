@@ -96,26 +96,25 @@ export default function ClayApp() {
       
       setUser(currentUser);
       
-      // Load use count from Supabase (or localStorage fallback)
+      // Load use count - CRITICAL: Always use database for authenticated users
       if (currentUser?.id) {
         try {
+          // Always get fresh count from database (never localStorage for logged-in users)
           const count = await getUserUseCount(currentUser.id);
           setUseCount(count);
-          // Sync to localStorage for backward compatibility
-          localStorage.setItem('clay_use_count', count.toString());
+          // Don't sync to localStorage - it causes cross-user contamination
         } catch (error) {
           console.error('Error loading use count:', error);
-          // Fallback to localStorage
-          const savedCount = localStorage.getItem('clay_use_count');
-          if (savedCount) {
-            setUseCount(parseInt(savedCount, 10));
-          }
+          // If database fails, default to 0 (don't use localStorage for authenticated users)
+          setUseCount(0);
         }
       } else {
-        // No user, use localStorage
+        // No user logged in - use localStorage for anonymous users only
         const savedCount = localStorage.getItem('clay_use_count');
         if (savedCount) {
           setUseCount(parseInt(savedCount, 10));
+        } else {
+          setUseCount(0);
         }
       }
       
@@ -293,16 +292,18 @@ export default function ClayApp() {
       // Increment use count if not pro
       if (!isPro && user?.id) {
         try {
+          // For authenticated users, only use database
           const newCount = await incrementUseCount(user.id);
           setUseCount(newCount);
-          localStorage.setItem('clay_use_count', newCount.toString());
+          // Don't save to localStorage - causes cross-user issues
         } catch (error) {
           console.error('Error incrementing use count:', error);
+          // Fallback: increment state but don't persist to localStorage
           const newCount = useCount + 1;
           setUseCount(newCount);
-          localStorage.setItem('clay_use_count', newCount.toString());
         }
       } else if (!isPro) {
+        // Anonymous user - use localStorage only
         const newCount = useCount + 1;
         setUseCount(newCount);
         localStorage.setItem('clay_use_count', newCount.toString());
@@ -334,16 +335,18 @@ export default function ClayApp() {
         });
         if (!isPro && user?.id) {
           try {
+            // For authenticated users, only use database
             const newCount = await incrementUseCount(user.id);
             setUseCount(newCount);
-            localStorage.setItem('clay_use_count', newCount.toString());
+            // Don't save to localStorage - causes cross-user contamination
           } catch (error) {
             console.error('Error incrementing use count:', error);
+            // Fallback: increment state but don't persist to localStorage for authenticated users
             const newCount = useCount + 1;
             setUseCount(newCount);
-            localStorage.setItem('clay_use_count', newCount.toString());
           }
         } else if (!isPro) {
+          // Anonymous user - use localStorage only
           const newCount = useCount + 1;
           setUseCount(newCount);
           localStorage.setItem('clay_use_count', newCount.toString());

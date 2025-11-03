@@ -12,7 +12,10 @@ export async function signUp(email, password, name) {
   if (!isSupabaseConfigured()) {
     // Fallback to localStorage auth
     const { signUp: localSignUp } = await import('./auth');
-    return localSignUp(email, password, name);
+    const user = localSignUp(email, password, name);
+    // Clear localStorage use count for new user
+    localStorage.removeItem('clay_use_count');
+    return user;
   }
 
   try {
@@ -22,6 +25,9 @@ export async function signUp(email, password, name) {
     if (!trimmedEmail || trimmedEmail.length < 3) {
       throw new Error('Email is required and must be at least 3 characters');
     }
+    
+    // CRITICAL: Clear localStorage use count before signup (new user = fresh start)
+    localStorage.removeItem('clay_use_count');
     
     const { data, error } = await supabase.auth.signUp({
       email: trimmedEmail,
@@ -45,6 +51,14 @@ export async function signUp(email, password, name) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const profile = await getUserProfile(data.user.id);
 
+    // Ensure use count is 0 for new user (don't trust localStorage)
+    if (profile?.use_count === undefined || profile?.use_count === null) {
+      // Profile might not have use_count yet, ensure it's 0
+      await updateUserProfile(data.user.id, { use_count: 0 }).catch(() => {
+        // Ignore errors - profile might not exist yet
+      });
+    }
+
     return {
       id: data.user.id,
       email: data.user.email,
@@ -63,10 +77,16 @@ export async function signIn(email, password) {
   if (!isSupabaseConfigured()) {
     // Fallback to localStorage auth
     const { signIn: localSignIn } = await import('./auth');
-    return localSignIn(email, password);
+    const user = localSignIn(email, password);
+    // Clear localStorage use count - use database count instead
+    localStorage.removeItem('clay_use_count');
+    return user;
   }
 
   try {
+    // CRITICAL: Clear localStorage use count on sign in (use database count)
+    localStorage.removeItem('clay_use_count');
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -223,19 +243,26 @@ export async function setUserAsPro(userId) {
  */
 export async function getUserUseCount(userId) {
   if (!isSupabaseConfigured() || !userId) {
-    // Fallback to localStorage
+    // Fallback to localStorage (only when Supabase not configured)
     const savedCount = localStorage.getItem('clay_use_count');
     return savedCount ? parseInt(savedCount, 10) : 0;
   }
 
   try {
     const profile = await getUserProfile(userId);
-    return profile?.use_count || 0;
+    // CRITICAL: Always use database count, never localStorage fallback when we have a user
+    // If profile doesn't exist or use_count is null/undefined, default to 0
+    const count = profile?.use_count ?? 0;
+    
+    // Ensure it's a valid number
+    const useCount = typeof count === 'number' && !isNaN(count) ? count : 0;
+    
+    return useCount;
   } catch (error) {
     console.error('Error fetching use count:', error);
-    // Fallback to localStorage
-    const savedCount = localStorage.getItem('clay_use_count');
-    return savedCount ? parseInt(savedCount, 10) : 0;
+    // If we have a user ID, always return 0 (don't use localStorage for authenticated users)
+    // Only use localStorage fallback when Supabase is not configured
+    return 0;
   }
 }
 
@@ -244,7 +271,7 @@ export async function getUserUseCount(userId) {
  */
 export async function incrementUseCount(userId) {
   if (!isSupabaseConfigured() || !userId) {
-    // Fallback to localStorage
+    // Fallback to localStorage (only when Supabase not configured)
     const currentCount = parseInt(localStorage.getItem('clay_use_count') || '0', 10);
     const newCount = currentCount + 1;
     localStorage.setItem('clay_use_count', newCount.toString());
@@ -253,18 +280,19 @@ export async function incrementUseCount(userId) {
 
   try {
     const profile = await getUserProfile(userId);
-    const currentCount = profile?.use_count || 0;
+    const currentCount = profile?.use_count ?? 0;
     const newCount = currentCount + 1;
     
     await updateUserProfile(userId, { use_count: newCount });
+    // Don't update localStorage - it causes cross-user contamination
     return newCount;
   } catch (error) {
     console.error('Error incrementing use count:', error);
-    // Fallback to localStorage
-    const currentCount = parseInt(localStorage.getItem('clay_use_count') || '0', 10);
-    const newCount = currentCount + 1;
-    localStorage.setItem('clay_use_count', newCount.toString());
-    return newCount;
+    // For authenticated users, don't fall back to localStorage
+    // Return current count + 1 but don't persist (will be saved on next successful DB call)
+    const profile = await getUserProfile(userId).catch(() => null);
+    const currentCount = profile?.use_count ?? 0;
+    return currentCount + 1;
   }
 }
 

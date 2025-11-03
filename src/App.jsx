@@ -8,6 +8,7 @@ import { getCurrentUser, signOut } from './utils/auth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
 import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -253,6 +254,8 @@ export default function ClayApp() {
     // If user not signed in, redirect to sign up first
     if (!user) {
       setShowUpgrade(false);
+      // Store intent to upgrade after sign-up
+      localStorage.setItem('clay_upgrade_after_signup', 'true');
       setShowSignUpPage(true);
       return;
     }
@@ -289,8 +292,17 @@ export default function ClayApp() {
           if (userData?.isPro) {
             setIsPro(true);
           }
+          // If user signed up with upgrade intent, show upgrade modal
+          const upgradeAfterSignup = localStorage.getItem('clay_upgrade_after_signup');
+          if (upgradeAfterSignup === 'true') {
+            localStorage.removeItem('clay_upgrade_after_signup');
+            setShowUpgrade(true);
+          }
         }}
-        onBack={() => setShowSignUpPage(false)}
+        onBack={() => {
+          setShowSignUpPage(false);
+          localStorage.removeItem('clay_upgrade_after_signup');
+        }}
       />
     );
   }
@@ -331,11 +343,8 @@ export default function ClayApp() {
               {!isPro && (
                 <button
                   onClick={() => {
-                    if (!user) {
-                      setShowSignUpPage(true);
-                    } else {
-                      setShowUpgrade(true);
-                    }
+                    // Always show pricing modal - no sign-up required to view
+                    setShowUpgrade(true);
                   }}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 active:scale-95 transition-all"
                 >
@@ -745,17 +754,24 @@ Requirements:
       )}
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-6 border-t bg-white">
-        Made with <span className="text-red-500">♥</span> by{' '}
-        <a 
-          href="https://roundtripux.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
-        >
-          roundtrip ux
-        </a>
-        {' '}· Free forever
+      <footer className="border-t bg-white">
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-center text-sm text-gray-500">
+              Made with <span className="text-red-500">♥</span> by{' '}
+              <a 
+                href="https://roundtripux.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
+              >
+                roundtrip ux
+              </a>
+              {' '}· Free forever
+            </p>
+            <LanguageSwitcher />
+          </div>
+        </div>
       </footer>
 
       {/* Upgrade Modal */}
@@ -767,9 +783,19 @@ Requirements:
                 <Zap className="w-8 h-8 text-amber-600" />
               </div>
               
-              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Ready to keep going? 🚀</h2>
+              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+                {useCount >= 3 && !isPro 
+                  ? 'Ready to keep going? 🚀'
+                  : 'Unlock Pro Features 💎'
+                }
+              </h2>
               <p className="text-base text-gray-600 text-center mb-6">
-                You've used all 3 free optimizations. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.
+                {useCount >= 3 && !isPro
+                  ? <>You've used all 3 free optimizations. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
+                  : !user
+                  ? <>Get unlimited resume optimizations, all tone options, and priority AI processing for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
+                  : <>You have {freeUsesLeft} free optimization{freeUsesLeft !== 1 ? 's' : ''} left. Unlock unlimited optimizations for just <strong className="text-gray-900">$7.99</strong> — one payment, yours forever.</>
+                }
               </p>
 
               {/* Pricing - Conversion Optimized */}
@@ -843,18 +869,31 @@ Requirements:
               {!user && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
                   <p className="text-sm text-blue-900 text-center">
-                    <strong>Sign up first</strong> to unlock Pro — takes 30 seconds
+                    <strong>Sign up</strong> (30 seconds) or continue below to upgrade
                   </p>
                 </div>
               )}
 
-              <button
-                onClick={handleUpgrade}
-                className="w-full h-16 bg-gray-900 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl mb-3"
-              >
-                <Zap className="w-6 h-6" />
-                {user ? 'Upgrade to Pro — $7.99' : 'Sign up & Upgrade — $7.99'}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleUpgrade}
+                  className="w-full h-16 bg-gray-900 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl hover:shadow-2xl"
+                >
+                  <Zap className="w-6 h-6" />
+                  {user ? 'Upgrade to Pro — $7.99' : 'Get Pro — $7.99'}
+                </button>
+                {!user && (
+                  <button
+                    onClick={() => {
+                      setShowUpgrade(false);
+                      setShowSignUpPage(true);
+                    }}
+                    className="w-full h-12 bg-gray-100 text-gray-900 rounded-xl font-semibold text-base hover:bg-gray-200 active:scale-[0.98] transition-all"
+                  >
+                    Sign up first (free)
+                  </button>
+                )}
+              </div>
 
               <button
                 onClick={() => setShowUpgrade(false)}

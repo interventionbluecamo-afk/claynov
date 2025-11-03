@@ -900,8 +900,109 @@ Requirements:
               </div>
             </div>
 
+            {/* Resume Preview - THE BIG REVEAL! */}
+            <div className="mb-6">
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-1 shadow-xl">
+                <div className="bg-white rounded-3xl overflow-hidden">
+                  <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-base sm:text-lg font-bold text-gray-900">Your Optimized Resume</h2>
+                          <p className="text-xs text-gray-600">Ready to download and impress</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-xs text-gray-600 font-medium">Optimized</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5 sm:p-6 md:p-8 bg-white max-h-[50vh] overflow-y-auto">
+                    <div className="resume-preview text-gray-900">
+                      {result.optimizedText.split('\n').map((line, idx, arr) => {
+                        const trimmed = line.trim();
+                        const prevLine = idx > 0 ? arr[idx - 1].trim() : '';
+                        const isInBulletList = prevLine.startsWith('- ') || prevLine.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('* ');
+                        
+                        if (!trimmed) {
+                          // Only add spacing if not in a bullet list
+                          if (!isInBulletList && prevLine) {
+                            return <div key={idx} className="h-3" />;
+                          }
+                          return null;
+                        }
+                        
+                        // Headings
+                        if (trimmed.startsWith('# ')) {
+                          return (
+                            <h1 key={idx} className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 mt-6 first:mt-0 leading-tight">
+                              {trimmed.substring(2)}
+                            </h1>
+                          );
+                        } else if (trimmed.startsWith('## ')) {
+                          return (
+                            <h2 key={idx} className="text-xl sm:text-2xl font-bold text-gray-900 mb-2.5 mt-5 leading-tight">
+                              {trimmed.substring(3)}
+                            </h2>
+                          );
+                        } else if (trimmed.startsWith('### ')) {
+                          return (
+                            <h3 key={idx} className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 mt-4 leading-tight">
+                              {trimmed.substring(4)}
+                            </h3>
+                          );
+                        } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                          // Bullet points
+                          return (
+                            <div key={idx} className="flex gap-3 mb-1.5">
+                              <span className="text-gray-500 mt-1.5 text-lg leading-none flex-shrink-0">•</span>
+                              <p className="text-sm sm:text-base text-gray-700 flex-1 leading-relaxed">
+                                {trimmed.substring(2)}
+                              </p>
+                            </div>
+                          );
+                        } else {
+                          // Regular paragraph - check if it's a continuation or new paragraph
+                          const isContinuation = idx > 0 && !prevLine && !arr[idx - 2]?.trim().startsWith('#') && !arr[idx - 2]?.trim().startsWith('-');
+                          if (isContinuation) {
+                            return (
+                              <span key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                                {' '}{trimmed}
+                              </span>
+                            );
+                          }
+                          return (
+                            <p key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3">
+                              {trimmed}
+                            </p>
+                          );
+                        }
+                      }).filter(Boolean)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Primary Download CTA */}
+            <button 
+              onClick={handleDownload}
+              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-2.5 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl mb-6"
+              aria-label="Download optimized resume as DOCX file"
+            >
+              <Download className="w-5 h-5 sm:w-6 sm:h-6" /> 
+              <span>Download Resume</span>
+            </button>
+          </div>
+
+          {/* Scrollable Content - Features Below */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
             {/* Quick Actions - Collapsible Sections (Airbnb-style) */}
-            <div className="space-y-2.5 mb-6">
+            <div className="space-y-2.5">
               {/* Tone Switcher - Collapsible */}
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <button
@@ -1159,34 +1260,6 @@ Requirements:
                 <RefreshCw className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
                 <span>Regenerate resume</span>
               </button>
-            </div>
-
-            {/* Primary Download CTA */}
-            <button 
-              onClick={handleDownload}
-              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-2.5 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
-              aria-label="Download optimized resume as DOCX file"
-            >
-              <Download className="w-5 h-5 sm:w-6 sm:h-6" /> 
-              <span>Download Resume</span>
-            </button>
-          </div>
-
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5">
-            {/* Full Preview */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-4 sm:px-5 py-3.5 bg-gray-50/50 border-b border-gray-200">
-                <div className="flex items-center gap-2.5">
-                  <FileText className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-semibold text-gray-900">Resume Preview</span>
-                </div>
-              </div>
-              <div className="p-4 sm:p-6 max-h-[60vh] overflow-y-auto bg-white">
-                <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 font-sans font-normal">
-                  {result.optimizedText}
-                </pre>
-              </div>
             </div>
 
             {/* Social Proof */}

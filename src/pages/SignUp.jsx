@@ -115,12 +115,6 @@ export default function SignUp({ onSuccess, onBack, user }) {
     }
   };
 
-  const handleGoogleAuth = () => {
-    // Mock Google sign in
-    const mockUser = { email: 'demo@gmail.com', isPro: false };
-    onSuccess(mockUser);
-  };
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}

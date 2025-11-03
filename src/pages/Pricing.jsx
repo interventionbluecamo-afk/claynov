@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Zap, Check, Lock, Star } from 'lucide-react';
 import { toast } from '../components/Toast';
-import { t } from '../utils/i18n';
 
 export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUsesLeft = 3, isPro = false }) {
   const [loading, setLoading] = useState(false);
@@ -44,17 +43,17 @@ export default function Pricing({ user, onUpgrade, onBack, useCount = 0, freeUse
           </div>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
-            {t('Unlock Pro Features 💎')}
+            Unlock Pro Features 💎
           </h1>
           
           <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto leading-relaxed">
             {hasUsedAllFree
-              ? t("You've used all 3 free optimizations. Unlock unlimited optimizations for just $7.99 — one payment, yours forever.")
+              ? "You've used all 3 free optimizations. Unlock unlimited optimizations for just $7.99 — one payment, yours forever."
               : !user
-              ? t("Get unlimited resume optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever.")
+              ? "Get unlimited resume optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever."
               : freeUsesLeft > 0
-              ? t(`You have ${freeUsesLeft} free optimization${freeUsesLeft !== 1 ? 's' : ''} left. Upgrade now to unlock unlimited optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever.`)
-              : t("Get unlimited resume optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever.")
+              ? `You have ${freeUsesLeft} free optimization${freeUsesLeft !== 1 ? 's' : ''} left. Upgrade now to unlock unlimited optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever.`
+              : "Get unlimited resume optimizations, all tone options, and priority AI processing for just $7.99 — one payment, yours forever."
             }
           </p>
         </div>

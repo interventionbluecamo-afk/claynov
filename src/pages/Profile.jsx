@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, User, Mail, Zap, Check, Edit2, Save, X, LogOut } from 'lucide-react';
 import { getCurrentUser, signOut, updateUserProfile } from '../utils/supabaseAuth';
 import { toast } from '../components/Toast';
-import { t } from '../utils/i18n';
 
 export default function Profile({ onBack, user, setUser }) {
   const [name, setName] = useState(user?.name || '');
@@ -66,7 +65,7 @@ export default function Profile({ onBack, user, setUser }) {
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <span className="text-xl font-bold text-gray-900">{t('Profile')}</span>
+          <span className="text-xl font-bold text-gray-900">Profile</span>
           <div className="w-9" /> {/* Spacer */}
         </div>
       </header>

@@ -7,6 +7,7 @@ import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
 import { getCurrentUser, signOut } from './utils/auth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
+import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from './utils/weeklyCount';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -24,6 +25,7 @@ export default function ClayApp() {
   const [showSignUpPage, setShowSignUpPage] = useState(false);
   const [user, setUser] = useState(null);
   const [authEmail, setAuthEmail] = useState('');
+  const [weeklyCount, setWeeklyCount] = useState(0);
 
   // Check auth on mount
   useEffect(() => {
@@ -34,6 +36,8 @@ export default function ClayApp() {
     if (savedCount) {
       setUseCount(parseInt(savedCount, 10));
     }
+    // Load weekly count
+    setWeeklyCount(getWeeklyResumeCount());
   }, []);
 
   const [isPro, setIsPro] = useState(user?.isPro || false);
@@ -121,6 +125,9 @@ export default function ClayApp() {
       }
       
       setStep(3);
+      // Increment weekly count
+      const newWeeklyCount = incrementWeeklyCount();
+      setWeeklyCount(newWeeklyCount);
       // Trigger confetti celebration!
       createConfetti();
     } catch (err) {
@@ -145,6 +152,9 @@ export default function ClayApp() {
           localStorage.setItem('clay_use_count', newCount.toString());
         }
         setStep(3);
+        // Increment weekly count
+        const newWeeklyCount = incrementWeeklyCount();
+        setWeeklyCount(newWeeklyCount);
         // Trigger confetti celebration!
         createConfetti();
       } catch (mockErr) {
@@ -352,7 +362,7 @@ export default function ClayApp() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-sm font-medium text-green-700 mb-4">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                2,847 resumes optimized this week
+                {formatWeeklyCount(weeklyCount)} resumes optimized this week
               </div>
               <h1 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight">
                 Get more interviews
@@ -411,24 +421,18 @@ export default function ClayApp() {
               </label>
             </div>
 
-            <div className="flex items-center justify-center gap-6 mt-12 text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-12 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-50 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600" />
-                </div>
-                <span>100% Free</span>
+                <span className="text-xl">🚀</span>
+                <span>Instant results</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-blue-600" />
-                </div>
-                <span>No signup</span>
+                <span className="text-xl">🔒</span>
+                <span>100% private</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-purple-50 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-purple-600" />
-                </div>
-                <span>Private</span>
+                <span className="text-xl">✨</span>
+                <span>Free to start</span>
               </div>
             </div>
           </div>
@@ -516,52 +520,78 @@ Requirements:
         </div>
       )}
 
-      {/* Step 3: Results */}
+      {/* Step 3: Results - Redesigned for better UX and conversion */}
       {step === 3 && result && (
-        <div className="flex-1 flex flex-col pb-40 max-w-4xl mx-auto w-full">
-          {/* Success Header */}
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white px-6 py-12 text-center">
-            <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8" />
+        <div className="flex-1 flex flex-col pb-32 max-w-4xl mx-auto w-full">
+          {/* Compact Success Header */}
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white px-4 sm:px-6 py-6 sm:py-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Check className="w-5 h-5 text-green-400" />
+                  <h2 className="text-2xl sm:text-3xl font-bold">Resume optimized! 🎉</h2>
+                </div>
+                <p className="text-sm sm:text-base text-white/70">Ready to download and apply</p>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <div className="text-right">
+                  <div className="text-2xl sm:text-3xl font-bold">{result.ats}</div>
+                  <div className="text-xs text-white/60">ATS</div>
+                </div>
+              </div>
             </div>
-            <h2 className="text-3xl font-bold mb-2">Resume optimized! 🎉</h2>
-            <p className="text-lg text-white/80">Ready to download and apply</p>
-            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur rounded-full text-sm">
-              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-white/90">Optimized in 3.2 seconds</span>
+            
+            {/* Compact Stats Row */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{result.match}</div>
+                <div className="text-xs text-white/70">Match</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{result.improvements || result.changes?.length || 12}</div>
+                <div className="text-xs text-white/70">Changes</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">✨</div>
+                <div className="text-xs text-white/70">Optimized</div>
+              </div>
             </div>
           </div>
 
-          <div className="px-4 -mt-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-white rounded-2xl p-5 shadow-lg text-center border border-gray-100">
-                <div className="text-3xl font-bold text-gray-900 mb-1">{result.ats}</div>
-                <div className="text-xs text-gray-600 font-medium">ATS Score</div>
-              </div>
-              <div className="bg-white rounded-2xl p-5 shadow-lg text-center border border-gray-100">
-                <div className="text-3xl font-bold text-gray-900 mb-1">{result.match}</div>
-                <div className="text-xs text-gray-600 font-medium">Match</div>
-              </div>
-              <div className="bg-white rounded-2xl p-5 shadow-lg text-center border border-gray-100">
-                <div className="text-3xl font-bold text-gray-900 mb-1">{result.improvements || result.changes?.length || 12}</div>
-                <div className="text-xs text-gray-600 font-medium">Changes</div>
-              </div>
+          <div className="px-4 sm:px-6 py-6 space-y-4">
+            {/* Primary CTA - Prominent and Early */}
+            <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
+              <button 
+                onClick={handleDownload}
+                className="w-full h-14 bg-gray-900 text-white rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg hover:bg-gray-800"
+              >
+                <Download className="w-5 h-5" /> 
+                <span>Download Optimized Resume</span>
+              </button>
+              <p className="text-xs text-gray-500 text-center mt-2">DOCX format · Ready to upload anywhere</p>
             </div>
 
-            {/* Tone Selector */}
-            <div className="bg-white rounded-2xl p-5 shadow-lg mb-6 border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Adjust tone</h3>
+            {/* Tone Selector - Compact and Inline */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-600">Tone:</span>
+                {processing && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Updating...</span>
+                  </div>
+                )}
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {['Professional', 'Creative', 'Technical', 'Executive'].map(t => (
                   <button 
                     key={t}
                     onClick={() => handleToneChange(t.toLowerCase())}
                     disabled={processing}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all disabled:opacity-50 ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all disabled:opacity-50 flex-shrink-0 ${
                       tone === t.toLowerCase()
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-gray-900 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
                     }`}
                   >
                     {t}
@@ -570,50 +600,52 @@ Requirements:
               </div>
             </div>
 
-            {/* Preview - Enhanced to pop more */}
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-900 overflow-hidden mb-6 transform hover:scale-[1.01] transition-transform duration-200">
-              <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-5 py-3 flex items-center justify-between">
+            {/* Preview - Hero Section */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gray-900 px-4 sm:px-5 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-white" />
-                  <span className="text-sm font-semibold text-white">Preview</span>
+                  <span className="text-sm font-semibold text-white">Preview Your Optimized Resume</span>
                 </div>
-                <span className="text-xs text-white/80">Scroll to see all</span>
+                <span className="text-xs text-white/70 hidden sm:inline">Scroll to review</span>
               </div>
-              <div className="p-6 max-h-96 overflow-y-auto bg-white">
-                <pre className="whitespace-pre-wrap text-xs font-sans text-gray-900 leading-relaxed font-medium">
+              <div className="p-4 sm:p-6 max-h-[60vh] sm:max-h-[500px] overflow-y-auto bg-white">
+                <pre className="whitespace-pre-wrap text-xs sm:text-sm font-sans text-gray-800 leading-relaxed">
                   {result.optimizedText}
                 </pre>
               </div>
+              <div className="bg-gray-50 px-4 sm:px-5 py-3 border-t border-gray-200">
+                <button 
+                  onClick={handleDownload}
+                  className="w-full sm:w-auto sm:ml-auto sm:mr-0 h-11 bg-gray-900 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 px-6 active:scale-[0.98] transition-all hover:bg-gray-800"
+                >
+                  <Download className="w-4 h-4" /> 
+                  <span>Download Now</span>
+                </button>
+              </div>
             </div>
 
-            {/* Social Proof */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 text-center mb-6">
+            {/* Social Proof - Build Confidence */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-5 border border-amber-200">
               <div className="flex items-center justify-center gap-1 mb-2">
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-sm text-gray-700 mb-1">"Got 3 interviews in a week. This tool is incredible." 🚀</p>
-              <p className="text-xs text-gray-500">— Marcus L., Product Manager</p>
+              <p className="text-sm sm:text-base text-gray-800 text-center mb-1 font-medium">
+                "Got 3 interviews in a week. This tool is incredible." 🚀
+              </p>
+              <p className="text-xs text-gray-600 text-center">— Marcus L., Product Manager</p>
             </div>
-          </div>
 
-          {/* Fixed Actions */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-2">
-            <div className="max-w-4xl mx-auto space-y-2">
-              <button 
-                onClick={handleDownload}
-                className="w-full h-14 bg-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-              >
-                <Download className="w-5 h-5" /> Download Resume
-              </button>
-              <button 
-                onClick={handleReset}
-                className="w-full h-12 bg-white text-gray-700 rounded-2xl font-medium text-base border-2 border-gray-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-gray-50"
-              >
-                <RefreshCw className="w-4 h-4" /> Optimize Another
-              </button>
-            </div>
+            {/* Secondary CTA */}
+            <button 
+              onClick={handleReset}
+              className="w-full h-12 bg-white text-gray-700 rounded-xl font-medium text-sm border-2 border-gray-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-gray-50"
+            >
+              <RefreshCw className="w-4 h-4" /> 
+              <span>Optimize Another Resume</span>
+            </button>
           </div>
         </div>
       )}
@@ -647,7 +679,16 @@ Requirements:
 
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-6 border-t bg-white">
-        Made with <span className="text-red-500">♥</span> by an indie maker · Free forever
+        Made with <span className="text-red-500">♥</span> by{' '}
+        <a 
+          href="https://roundtripux.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-gray-700 hover:text-gray-900 font-medium underline underline-offset-2 transition-colors"
+        >
+          roundtrip ux
+        </a>
+        {' '}· Free forever
       </footer>
 
       {/* Auth Modal */}
@@ -726,9 +767,14 @@ Requirements:
               </div>
               
               <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">You're on a roll! 🚀</h2>
-              <p className="text-base text-gray-600 text-center mb-6">
-                You've used all 3 free optimizations. Keep the momentum going?
+              <p className="text-base text-gray-600 text-center mb-4">
+                You've used all 3 free optimizations. Upgrade to Pro for unlimited optimizations!
               </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-6 text-center">
+                <p className="text-xs text-blue-700">
+                  💡 <strong>Tip:</strong> Sign up to track your progress and unlock more features. We use secure authentication to prevent abuse.
+                </p>
+              </div>
 
               {/* Pricing */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-6 border-2 border-gray-900">

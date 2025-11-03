@@ -742,39 +742,57 @@ Requirements:
       {/* Step 3: Results - Clean & Focused */}
       {step === 3 && result && (
         <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full bg-white">
-          {/* Success Banner */}
-          <div className="bg-gray-900 px-4 sm:px-6 py-8 sm:py-10">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white">All set! 🎉</h1>
+          {/* Success Hero Section */}
+          <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 px-4 sm:px-6 py-6 sm:py-8 border-b border-gray-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+                Resume optimized! 🎉
+              </h1>
+              <p className="text-base sm:text-lg text-gray-600">
+                Ready to download and start applying
+              </p>
+            </div>
+
+            {/* Stats Cards - Improved Design */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
+                <div className="text-4xl sm:text-5xl font-bold text-gray-900 mb-1 tracking-tight">{result.ats}</div>
+                <div className="text-xs sm:text-sm text-gray-600 font-medium">ATS Score</div>
+                <div className="mt-2 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                  <span className="text-xs text-green-600 font-medium">Excellent</span>
                 </div>
-                <p className="text-white/70 text-base">Your resume is optimized and ready to download</p>
+              </div>
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm">
+                <div className="text-4xl sm:text-5xl font-bold text-gray-900 mb-1 tracking-tight">{result.match}%</div>
+                <div className="text-xs sm:text-sm text-gray-600 font-medium">Job Match</div>
+                <div className="mt-2 flex items-center gap-1">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500 fill-amber-500" />
+                  <span className="text-xs text-amber-600 font-medium">Strong match</span>
+                </div>
               </div>
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-0.5">{result.ats}</div>
-                <div className="text-xs text-white/60">ATS Score</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-0.5">{result.match}%</div>
-                <div className="text-xs text-white/60">Job Match</div>
+            {/* Improvements Count */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-6">
+              <div className="flex items-center justify-center gap-2">
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                <span className="text-sm sm:text-base text-gray-900 font-semibold">
+                  {result.improvements || 12} improvements made
+                </span>
               </div>
             </div>
 
-            {/* Download CTA */}
+            {/* Primary Download CTA */}
             <button 
               onClick={handleDownload}
-              className="w-full h-14 bg-white text-gray-900 rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:bg-gray-100 active:scale-[0.98] transition-all"
+              className="w-full h-14 sm:h-16 bg-gray-900 text-white rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
             >
-              <Download className="w-5 h-5" /> 
-              <span>Download Resume</span>
+              <Download className="w-5 h-5 sm:w-6 sm:h-6" /> 
+              <span>Download Resume (DOCX)</span>
             </button>
           </div>
 
@@ -888,17 +906,6 @@ Requirements:
             </button>
           </div>
 
-          {/* Fixed Bottom Download */}
-          <div className="border-t bg-white p-4 shadow-lg">
-            <button 
-              onClick={handleDownload}
-              className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-              aria-label="Download resume as DOCX file"
-            >
-              <Download className="w-5 h-5" /> 
-              <span>Download Resume (DOCX)</span>
-            </button>
-          </div>
         </div>
       )}
 

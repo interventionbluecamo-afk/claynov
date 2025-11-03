@@ -779,18 +779,41 @@ export default function ClayApp() {
               </label>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-12 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🚀</span>
-                <span>Instant results</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 max-w-2xl mx-auto">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">Instant results</div>
+                    <div className="text-xs text-gray-500">Optimized in seconds</div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🔒</span>
-                <span>100% private</span>
+              
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">100% private</div>
+                    <div className="text-xs text-gray-500">Stays on your device</div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">✨</span>
-                <span>3 free optimizations</span>
+              
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">3 free tries</div>
+                    <div className="text-xs text-gray-500">No credit card needed</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

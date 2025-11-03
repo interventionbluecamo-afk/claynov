@@ -4,7 +4,7 @@ import { parseResume } from './utils/fileParser';
 import { optimizeResume as optimizeResumeApi } from './utils/claudeApi';
 import { mockOptimizeResume } from './utils/mockApi';
 import { generateResumeDocx, downloadBlob } from './utils/resumeGenerator';
-import { getCurrentUser, signOut } from './utils/auth';
+import { getCurrentUser, signOut } from './utils/supabaseAuth';
 import { createConfetti } from './utils/confetti';
 import SignUp from './pages/SignUp';
 import Pricing from './pages/Pricing';
@@ -31,15 +31,18 @@ export default function ClayApp() {
 
   // Check auth on mount
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-    // Load use count from localStorage
-    const savedCount = localStorage.getItem('clay_use_count');
-    if (savedCount) {
-      setUseCount(parseInt(savedCount, 10));
-    }
-    // Load weekly count
-    setWeeklyCount(getWeeklyResumeCount());
+    const loadUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      // Load use count from localStorage
+      const savedCount = localStorage.getItem('clay_use_count');
+      if (savedCount) {
+        setUseCount(parseInt(savedCount, 10));
+      }
+      // Load weekly count
+      setWeeklyCount(getWeeklyResumeCount());
+    };
+    loadUser();
   }, []);
 
   // Listen for sign up events from Pricing page
@@ -330,7 +333,7 @@ export default function ClayApp() {
       <ErrorBoundary>
         <SignUp
           user={user}
-          onSuccess={(userData) => {
+          onSuccess={async (userData) => {
             setUser(userData);
             setShowSignUpPage(false);
             if (userData?.isPro) {
@@ -400,8 +403,8 @@ export default function ClayApp() {
               </button>
               {user ? (
                 <button 
-                  onClick={() => {
-                    signOut();
+                  onClick={async () => {
+                    await signOut();
                     setUser(null);
                     handleReset();
                   }}

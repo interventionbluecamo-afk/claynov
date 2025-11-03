@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, Mail, ArrowLeft, Zap, Check, AlertCircle } from 'lucide-react';
-import { signUp, signIn } from '../utils/auth';
+import { signUp, signIn } from '../utils/supabaseAuth';
 import { toast } from '../components/Toast';
 
 export default function SignUp({ onSuccess, onBack, user }) {
@@ -98,10 +98,10 @@ export default function SignUp({ onSuccess, onBack, user }) {
     try {
       let userData;
       if (isSignIn) {
-        userData = signIn(email, password);
+        userData = await signIn(email, password);
         toast.success('Welcome back!');
       } else {
-        userData = signUp(email, password, name);
+        userData = await signUp(email, password, name);
         toast.success('Account created successfully!');
       }
       

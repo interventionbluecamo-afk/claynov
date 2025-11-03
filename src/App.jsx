@@ -12,6 +12,7 @@ import { getWeeklyResumeCount, formatWeeklyCount, incrementWeeklyCount } from '.
 import LanguageSwitcher from './components/LanguageSwitcher';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer, toast } from './components/Toast';
+import StepProgress from './components/StepProgress';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -378,18 +379,7 @@ export default function ClayApp() {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1.5">
-              {[1,2,3].map(i => (
-                <div 
-                  key={i} 
-                  className={`h-1.5 rounded-full transition-all ${
-                    step >= i ? 'bg-gray-900 w-6' : 'bg-gray-200 w-1.5'
-                  }`} 
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   // Always show pricing page - no sign-up required to view
@@ -423,9 +413,15 @@ export default function ClayApp() {
                 </button>
               )}
             </div>
-          </div>
         </div>
       </header>
+
+      {/* Step Progress Indicator - Only show when in flow (step 1-3) */}
+      {step >= 1 && step <= 3 && !showPricing && !showSignUpPage && (
+        <div className="border-b bg-white">
+          <StepProgress currentStep={step} />
+        </div>
+      )}
 
       {/* Error Banner */}
       {error && (

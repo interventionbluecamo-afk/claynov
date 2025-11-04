@@ -501,10 +501,11 @@ export default function ClayApp() {
         tone,
         resumeLength: resumeInfo.length,
         resumeWordCount: resumeInfo.wordCount,
-      jobDescLength: jobDescInfo.length,
-      jobDescWordCount: jobDescInfo.wordCount,
-      hasAccount: !!user,
-    });
+        jobDescLength: jobDescInfo.length,
+        jobDescWordCount: jobDescInfo.wordCount,
+        hasAccount: !!user,
+      });
+    }).catch(() => {});
 
     setProcessing(true);
     setError(null);

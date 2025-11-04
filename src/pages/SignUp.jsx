@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, ArrowLeft, Check, AlertCircle } from 'lucide-react';
 import { signUp, signIn } from '../utils/supabaseAuth';
 import { toast } from '../components/Toast';
+import { analytics, EVENTS } from '../utils/analytics';
 
 export default function SignUp({ onSuccess, onBack, user }) {
   const [email, setEmail] = useState('');
@@ -108,15 +109,29 @@ export default function SignUp({ onSuccess, onBack, user }) {
       if (isSignIn) {
         userData = await signIn(trimmedEmail, password);
         toast.success('Welcome back!');
+        analytics.track(EVENTS.SIGNUP_COMPLETED, {
+          method: 'sign_in',
+          hasUpgradeIntent: localStorage.getItem('clay_upgrade_after_signup') === 'true',
+        });
       } else {
         userData = await signUp(trimmedEmail, password, name.trim());
         toast.success('Account created successfully!');
+        analytics.track(EVENTS.SIGNUP_COMPLETED, {
+          method: 'sign_up',
+          hasUpgradeIntent: localStorage.getItem('clay_upgrade_after_signup') === 'true',
+        });
       }
       
       onSuccess(userData);
     } catch (err) {
       // Better error handling - check for specific Supabase errors
       let errorMsg = err.message || 'Something went wrong. Please try again.';
+      
+      // Track signup failure
+      analytics.track(EVENTS.SIGNUP_FAILED, {
+        method: isSignIn ? 'sign_in' : 'sign_up',
+        error: errorMsg,
+      });
       
       // Handle common Supabase errors
       if (err.message?.includes('Invalid email') || err.message?.includes('email')) {

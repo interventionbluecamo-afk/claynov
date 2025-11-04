@@ -17,6 +17,7 @@ import { getRandomTrustSignal, getTrustSignals } from './utils/trustSignals';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer, toast } from './components/Toast';
 import StepProgress from './components/StepProgress';
+import { analytics, EVENTS, getFileInfo, getTextInfo } from './utils/analytics';
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -146,6 +147,13 @@ export default function ClayApp() {
           // Show message that payment is being processed
           toast.info('Payment processing... We\'ll upgrade your account shortly!');
           
+          // Track payment completion (detected via localStorage flag)
+          analytics.track(EVENTS.PAYMENT_COMPLETED, {
+            userId: pendingUserId,
+            email: pendingEmail,
+            hoursSincePayment: hoursSincePayment,
+          });
+          
           // In production, you would:
           // 1. Check Stripe API for payment status
           // 2. Or wait for webhook to update user
@@ -158,11 +166,13 @@ export default function ClayApp() {
             // After 24 hours, clear the pending flag
             localStorage.removeItem('clay_pending_upgrade_email');
             localStorage.removeItem('clay_pending_upgrade_timestamp');
+            localStorage.removeItem('clay_pending_upgrade_user_id');
           }
         } else {
           // Timed out - clear pending
           localStorage.removeItem('clay_pending_upgrade_email');
           localStorage.removeItem('clay_pending_upgrade_timestamp');
+          localStorage.removeItem('clay_pending_upgrade_user_id');
         }
       }
     };
@@ -178,6 +188,70 @@ export default function ClayApp() {
     window.addEventListener('clay:showSignUp', handleShowSignUp);
     return () => window.removeEventListener('clay:showSignUp', handleShowSignUp);
   }, []);
+
+  // Track page views
+  useEffect(() => {
+    if (showPricing) {
+      analytics.page('Pricing');
+      analytics.track(EVENTS.PRICING_PAGE_VIEWED, {
+        useCount,
+        isPro,
+        hasEmail: !!user?.email,
+      });
+    } else if (showSignUpPage) {
+      analytics.page('SignUp');
+      analytics.track(EVENTS.SIGNUP_STARTED, {
+        source: 'pricing_page',
+      });
+    } else if (showProfile) {
+      analytics.page('Profile');
+      analytics.track(EVENTS.PROFILE_VIEWED);
+    } else if (showTerms) {
+      analytics.page('Terms');
+      analytics.track(EVENTS.TERMS_VIEWED);
+    } else if (showPrivacy) {
+      analytics.page('Privacy');
+      analytics.track(EVENTS.PRIVACY_VIEWED);
+    } else {
+      analytics.page(`Step ${step}`);
+      if (step === 1) {
+        analytics.track(EVENTS.LANDING_PAGE_VIEWED);
+      }
+    }
+  }, [step, showPricing, showSignUpPage, showProfile, showTerms, showPrivacy, useCount, isPro, user]);
+
+  // Track user identification
+  useEffect(() => {
+    if (user?.id) {
+      analytics.identify(user.id, {
+        email: user.email,
+        isPro: user.isPro || false,
+        name: user.name,
+        signupDate: user.created_at,
+        useCount: useCount,
+      });
+      
+      // Track returning user
+      const lastVisit = localStorage.getItem(`clay_last_visit_${user.id}`);
+      if (lastVisit) {
+        analytics.track(EVENTS.RETURNING_USER, {
+          daysSinceLastVisit: Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24)),
+        });
+      }
+      localStorage.setItem(`clay_last_visit_${user.id}`, Date.now().toString());
+    }
+  }, [user, useCount]);
+
+  // Track limit reached
+  useEffect(() => {
+    if (!isPro && useCount >= 3) {
+      analytics.track(EVENTS.LIMIT_REACHED, {
+        useCount,
+        hasEmail: !!user?.email,
+        hasAccount: !!user,
+      });
+    }
+  }, [useCount, isPro, user]);
 
   const [isPro, setIsPro] = useState(user?.isPro || false);
   const freeUsesLeft = Math.max(0, 3 - useCount);
@@ -210,6 +284,10 @@ export default function ClayApp() {
       const errorMsg = 'Please upload a PDF, DOC, or DOCX file.';
       setError(errorMsg);
       toast.error(errorMsg);
+      analytics.track(EVENTS.ERROR_OCCURRED, {
+        error: 'Invalid file type',
+        step: 'upload',
+      });
       return;
     }
 
@@ -217,8 +295,21 @@ export default function ClayApp() {
       const errorMsg = 'File size must be less than 5MB. Please compress your file.';
       setError(errorMsg);
       toast.error(errorMsg);
+      analytics.track(EVENTS.ERROR_OCCURRED, {
+        error: 'File too large',
+        step: 'upload',
+        fileSize: file.size,
+      });
       return;
     }
+
+    // Track file upload
+    const fileInfo = getFileInfo(file);
+    analytics.track(EVENTS.RESUME_UPLOADED, {
+      ...fileInfo,
+      isPro,
+      hasAccount: !!user,
+    });
 
     setResumeFile(file);
     setError(null);
@@ -235,10 +326,15 @@ export default function ClayApp() {
       setError(errorMsg);
       toast.error(errorMsg);
       setResumeFile(null);
+      analytics.track(EVENTS.ERROR_OCCURRED, {
+        error: errorMsg,
+        step: 'file_parsing',
+        ...fileInfo,
+      });
     } finally {
       setUploading(false);
     }
-  }, []);
+  }, [isPro, user]);
 
   const handleOptimize = useCallback(async () => {
     if (!resumeText.trim() || !jobDesc.trim()) {
@@ -251,6 +347,11 @@ export default function ClayApp() {
     // Check free uses limit
     if (!isPro && useCount >= 3) {
       // Show upgrade modal with better messaging
+      analytics.track(EVENTS.UPGRADE_MODAL_VIEWED, {
+        trigger: 'limit_reached',
+        useCount,
+        hasEmail: !!user?.email,
+      });
       if (!user) {
         // Encourage sign up first
         // Show pricing page instead of native confirm
@@ -261,6 +362,20 @@ export default function ClayApp() {
         return;
       }
     }
+
+    // Track optimization started
+    const resumeInfo = getTextInfo(resumeText);
+    const jobDescInfo = getTextInfo(jobDesc);
+    analytics.track(EVENTS.OPTIMIZATION_STARTED, {
+      useCount,
+      isPro,
+      tone,
+      resumeLength: resumeInfo.length,
+      resumeWordCount: resumeInfo.wordCount,
+      jobDescLength: jobDescInfo.length,
+      jobDescWordCount: jobDescInfo.wordCount,
+      hasAccount: !!user,
+    });
 
     setProcessing(true);
     setError(null);
@@ -326,6 +441,17 @@ export default function ClayApp() {
       // Trigger confetti celebration!
       createConfetti();
       toast.success('Resume optimized successfully! 🎉');
+      
+      // Track successful optimization
+      analytics.track(EVENTS.OPTIMIZATION_COMPLETED, {
+        useCount: useCount + 1,
+        isPro,
+        tone,
+        success: true,
+        atsScore: optimizationResult.ats_score || 94,
+        matchScore: optimizationResult.match_score || 96,
+        improvementsCount: optimizationResult.key_changes?.length || 0,
+      });
     } catch (err) {
       // Handle network/API errors - fallback to mock if serverless function unavailable
       const isNetworkError = err.message?.includes('Failed to fetch') || err.message?.includes('CORS_BLOCKED') || err.name === 'TypeError';
@@ -333,12 +459,26 @@ export default function ClayApp() {
         ? 'Backend server unavailable. Using demo optimization.'
         : err.message || 'Failed to optimize resume. Please try again.';
       
+      // Track optimization failure
+      analytics.track(EVENTS.OPTIMIZATION_FAILED, {
+        error: errorMsg,
+        isNetworkError,
+        useCount,
+        isPro,
+        tone,
+      });
+      
       if (isNetworkError) {
         console.warn('Network error - serverless function may not be deployed, falling back to mock API');
         toast.info('Using demo optimization (backend not configured)');
       } else {
         setError(errorMsg);
         toast.error(errorMsg);
+        analytics.track(EVENTS.ERROR_OCCURRED, {
+          error: errorMsg,
+          step: 'optimization',
+          useCount,
+        });
       }
       
       // Fallback to mock API if serverless function fails (e.g., not deployed yet)
@@ -351,6 +491,17 @@ export default function ClayApp() {
           changes: mockResult.key_changes || [],
           gaps: mockResult.gap_analysis || [],
           optimizedText: mockResult.optimized_resume || resumeText
+        });
+        
+        // Track mock API usage (fallback)
+        analytics.track(EVENTS.OPTIMIZATION_COMPLETED, {
+          useCount: useCount + 1,
+          isPro,
+          tone,
+          success: true,
+          isMock: true,
+          atsScore: mockResult.ats_score || 94,
+          matchScore: mockResult.match_score || 96,
         });
         if (!isPro && user?.id) {
           try {
@@ -393,7 +544,12 @@ export default function ClayApp() {
 
   const handleDownload = useCallback(async () => {
     if (!result?.optimizedText) {
-      setError('No optimized resume available to download.');
+      const errorMsg = 'No optimized resume available to download.';
+      setError(errorMsg);
+      analytics.track(EVENTS.ERROR_OCCURRED, {
+        error: errorMsg,
+        step: 'download',
+      });
       return;
     }
 
@@ -403,12 +559,34 @@ export default function ClayApp() {
         ? `Optimized_${resumeFile.name.replace(/\.[^/.]+$/, '.docx')}`
         : 'Optimized_Resume.docx';
       downloadBlob(blob, filename);
+      
+      // Track download
+      analytics.track(EVENTS.RESUME_DOWNLOADED, {
+        isPro,
+        useCount,
+        atsScore: result.ats,
+        matchScore: result.match,
+        tone,
+        hasAccount: !!user,
+      });
     } catch (err) {
-      setError('Failed to generate download. Please try again.');
+      const errorMsg = 'Failed to generate download. Please try again.';
+      setError(errorMsg);
+      analytics.track(EVENTS.ERROR_OCCURRED, {
+        error: errorMsg,
+        step: 'download',
+      });
     }
-  }, [result, resumeFile]);
+  }, [result, resumeFile, isPro, useCount, tone, user]);
 
   const handleReset = useCallback(() => {
+    // Track new optimization started
+    analytics.track(EVENTS.NEW_OPTIMIZATION_STARTED, {
+      previousUseCount: useCount,
+      isPro,
+      hasAccount: !!user,
+    });
+    
     setStep(1);
     setResumeFile(null);
     setResumeText('');
@@ -420,13 +598,20 @@ export default function ClayApp() {
     setExpandedSections({ tone: false, format: false, questions: false });
     const fileInput = document.getElementById('upload');
     if (fileInput) fileInput.value = '';
-  }, []);
+  }, [useCount, isPro, user]);
 
   const handleGenerateQuestions = useCallback(async () => {
     if (!resumeText || !jobDesc) {
       toast.error('Resume and job description required');
       return;
     }
+    
+    // Track interview questions generation
+    analytics.track(EVENTS.INTERVIEW_QUESTIONS_GENERATED, {
+      isPro,
+      useCount,
+      hasAccount: !!user,
+    });
 
     setGeneratingQuestions(true);
     try {
@@ -453,11 +638,20 @@ export default function ClayApp() {
   }, [resumeText, jobDesc]);
 
   const toggleSection = useCallback((section) => {
+    const isExpanding = !expandedSections[section];
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  }, []);
+    
+    // Track section expansion/collapse
+    if (isExpanding) {
+      analytics.track(EVENTS.SECTION_EXPANDED, {
+        section,
+        isPro,
+      });
+    }
+  }, [expandedSections, isPro]);
 
   const handleToneChange = useCallback(async (newTone) => {
     if (tone === newTone || !resumeText || !jobDesc) return;
@@ -502,6 +696,14 @@ export default function ClayApp() {
 
 
   const handleUpgrade = useCallback(async () => {
+    // Track upgrade click
+    analytics.track(EVENTS.UPGRADE_CLICKED, {
+      trigger: 'upgrade_button',
+      useCount,
+      hasAccount: !!user,
+      source: 'pricing_page',
+    });
+    
     // If user not signed in, redirect to sign up first
     if (!user) {
       setShowPricing(false);

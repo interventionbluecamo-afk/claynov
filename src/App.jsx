@@ -496,11 +496,11 @@ export default function ClayApp() {
     const jobDescInfo = safeGetTextInfo(jobDesc);
     loadAnalytics().then(() => {
       analytics.track(EVENTS?.OPTIMIZATION_STARTED || 'optimization_started', {
-      useCount,
-      isPro,
-      tone,
-      resumeLength: resumeInfo.length,
-      resumeWordCount: resumeInfo.wordCount,
+        useCount,
+        isPro,
+        tone,
+        resumeLength: resumeInfo.length,
+        resumeWordCount: resumeInfo.wordCount,
       jobDescLength: jobDescInfo.length,
       jobDescWordCount: jobDescInfo.wordCount,
       hasAccount: !!user,

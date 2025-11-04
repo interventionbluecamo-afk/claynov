@@ -380,14 +380,20 @@ export default function ClayApp() {
     }
   }, [useCount, isPro, user]);
 
-  const [isPro, setIsPro] = useState(user?.isPro || false);
-  const freeUsesLeft = Math.max(0, 3 - useCount);
+  // Initialize isPro from user on mount and update when user changes
+  useEffect(() => {
+    if (user) {
+      setIsPro(user.isPro || false);
+    }
+  }, [user]);
 
   // Update isPro when user changes, and reset use count if upgraded
   useEffect(() => {
     const wasPro = isPro;
     const nowPro = user?.isPro || false;
-    setIsPro(nowPro);
+    if (wasPro !== nowPro) {
+      setIsPro(nowPro);
+    }
     
     // If user just upgraded to Pro, reset their use count
     if (!wasPro && nowPro && user?.id) {

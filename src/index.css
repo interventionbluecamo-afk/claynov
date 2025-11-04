@@ -187,4 +187,9 @@
     animation-delay: 1.1s;
     opacity: 0;
   }
+
+  .animate-delay-1200 {
+    animation-delay: 1.2s;
+    opacity: 0;
+  }
 }

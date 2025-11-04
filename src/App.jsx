@@ -832,8 +832,23 @@ export default function ClayApp() {
                   </p>
                 </div>
 
-                {/* Feature 3: Pro Features Highlight */}
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden animate-fade-in-up animate-delay-1000">
+                {/* Feature 3: Interview Prep & Tone Flexibility */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up animate-delay-1000">
+                  <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                    <MessageSquare className="w-7 h-7 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Ace Your Interview</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                    Practice with AI-generated questions tailored to your experience and the role. Plus, instantly switch writing styles—professional, creative, or technical—to match any company's vibe and land more interviews.
+                  </p>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-purple-600">
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>Pro feature</span>
+                  </div>
+                </div>
+
+                {/* Feature 4: Pro Features Highlight */}
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden animate-fade-in-up animate-delay-1100">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                   <div className="relative">
                     <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">

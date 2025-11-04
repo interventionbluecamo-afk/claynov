@@ -60,6 +60,17 @@ export const EVENTS = {
   PRIVACY_VIEWED: 'privacy_viewed',
 };
 
+// Safe wrapper to check if PostHog is available
+const isPostHogReady = () => {
+  try {
+    return typeof window !== 'undefined' && 
+           window.posthog && 
+           typeof window.posthog.capture === 'function';
+  } catch {
+    return false;
+  }
+};
+
 export const analytics = {
   /**
    * Track an event with optional properties
@@ -67,18 +78,21 @@ export const analytics = {
    * @param {object} properties - Additional event properties
    */
   track: (event, properties = {}) => {
-    // PostHog tracking (if available)
-    if (typeof window !== 'undefined' && window.posthog) {
-      try {
+    try {
+      // PostHog tracking (if available and ready)
+      if (isPostHogReady()) {
         window.posthog.capture(event, properties);
-      } catch (error) {
-        console.error('PostHog tracking error:', error);
       }
-    }
 
-    // Console logging in development (always helpful for debugging)
-    if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
-      console.log('📊 Analytics:', event, properties);
+      // Console logging in development (always helpful for debugging)
+      if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+        console.log('📊 Analytics:', event, properties);
+      }
+    } catch (error) {
+      // Silently fail - don't break the app if analytics fails
+      if (import.meta.env.DEV) {
+        console.warn('Analytics tracking error:', error);
+      }
     }
   },
 
@@ -88,15 +102,18 @@ export const analytics = {
    * @param {object} traits - User traits (email, isPro, etc.)
    */
   identify: (userId, traits = {}) => {
-    if (typeof window !== 'undefined' && window.posthog) {
-      try {
+    try {
+      if (isPostHogReady() && typeof window.posthog.identify === 'function') {
         window.posthog.identify(userId, traits);
         
         if (import.meta.env.DEV) {
           console.log('👤 Analytics Identify:', userId, traits);
         }
-      } catch (error) {
-        console.error('PostHog identify error:', error);
+      }
+    } catch (error) {
+      // Silently fail - don't break the app if analytics fails
+      if (import.meta.env.DEV) {
+        console.warn('Analytics identify error:', error);
       }
     }
   },
@@ -107,19 +124,22 @@ export const analytics = {
    * @param {object} properties - Additional properties
    */
   page: (pageName, properties = {}) => {
-    if (typeof window !== 'undefined' && window.posthog) {
-      try {
+    try {
+      if (isPostHogReady()) {
         window.posthog.capture('$pageview', { 
           page: pageName,
           ...properties 
         });
-      } catch (error) {
-        console.error('PostHog page tracking error:', error);
       }
-    }
 
-    if (import.meta.env.DEV) {
-      console.log('📄 Page View:', pageName, properties);
+      if (import.meta.env.DEV) {
+        console.log('📄 Page View:', pageName, properties);
+      }
+    } catch (error) {
+      // Silently fail - don't break the app if analytics fails
+      if (import.meta.env.DEV) {
+        console.warn('Analytics page tracking error:', error);
+      }
     }
   },
 
@@ -127,15 +147,18 @@ export const analytics = {
    * Reset user identification (on logout)
    */
   reset: () => {
-    if (typeof window !== 'undefined' && window.posthog) {
-      try {
+    try {
+      if (isPostHogReady() && typeof window.posthog.reset === 'function') {
         window.posthog.reset();
         
         if (import.meta.env.DEV) {
           console.log('🔄 Analytics Reset');
         }
-      } catch (error) {
-        console.error('PostHog reset error:', error);
+      }
+    } catch (error) {
+      // Silently fail - don't break the app if analytics fails
+      if (import.meta.env.DEV) {
+        console.warn('Analytics reset error:', error);
       }
     }
   },

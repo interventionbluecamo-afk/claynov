@@ -94,12 +94,17 @@ export function redirectToStripePayment(userData) {
     localStorage.setItem('clay_pending_upgrade_timestamp', Date.now().toString());
   }
 
-  // Track payment started
-  analytics.track(EVENTS.PAYMENT_STARTED, {
-    userId: userData?.id,
-    email: userData?.email,
-    isPro: userData?.isPro || false,
-  });
+  // Track payment started (safely - don't block redirect if analytics fails)
+  try {
+    analytics.track(EVENTS.PAYMENT_STARTED, {
+      userId: userData?.id,
+      email: userData?.email,
+      isPro: userData?.isPro || false,
+    });
+  } catch (error) {
+    // Don't block payment redirect if analytics fails
+    console.warn('Analytics error (non-blocking):', error);
+  }
 
   // Redirect to Stripe Payment Link
   // Note: Make sure your Stripe Payment Link has a return URL set to your app

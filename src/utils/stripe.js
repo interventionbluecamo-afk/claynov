@@ -9,7 +9,31 @@
  * 4. Create a Stripe Checkout Session on your backend
  */
 
-import { analytics, EVENTS } from './analytics';
+// Lazy import analytics to avoid circular dependency
+let analyticsModule = null;
+const getAnalytics = async () => {
+  if (!analyticsModule) {
+    analyticsModule = await import('./analytics');
+  }
+  return analyticsModule;
+};
+
+// Safe wrapper for analytics calls
+const safeAnalyticsCall = async (method, ...args) => {
+  try {
+    const module = await getAnalytics();
+    if (module.analytics && module.analytics[method]) {
+      setTimeout(() => {
+        module.analytics[method](...args);
+      }, 0);
+    }
+  } catch (error) {
+    // Silently fail
+    if (import.meta.env.DEV) {
+      console.warn('Analytics error:', error);
+    }
+  }
+};
 
 /**
  * Initiate Stripe Checkout for Pro upgrade
@@ -95,21 +119,11 @@ export function redirectToStripePayment(userData) {
   }
 
   // Track payment started (safely - don't block redirect if analytics fails)
-  // Use setTimeout to defer and avoid blocking redirect
-  setTimeout(() => {
-    try {
-      analytics.track(EVENTS.PAYMENT_STARTED, {
-        userId: userData?.id,
-        email: userData?.email,
-        isPro: userData?.isPro || false,
-      });
-    } catch (error) {
-      // Don't block payment redirect if analytics fails
-      if (import.meta.env.DEV) {
-        console.warn('Analytics error (non-blocking):', error);
-      }
-    }
-  }, 0);
+  safeAnalyticsCall('track', 'payment_started', {
+    userId: userData?.id,
+    email: userData?.email,
+    isPro: userData?.isPro || false,
+  });
 
   // Redirect to Stripe Payment Link
   // Note: Make sure your Stripe Payment Link has a return URL set to your app

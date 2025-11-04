@@ -17,7 +17,57 @@ import { getRandomTrustSignal, getTrustSignals } from './utils/trustSignals';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer, toast } from './components/Toast';
 import StepProgress from './components/StepProgress';
-import { analytics, EVENTS, getFileInfo, getTextInfo } from './utils/analytics';
+// Import EVENTS immediately (just constants, no side effects)
+import { EVENTS as EVENTS_CONST, getFileInfo, getTextInfo } from './utils/analytics';
+
+// Lazy load analytics object to avoid initialization issues
+let analyticsLoaded = false;
+let analyticsObj = null;
+
+const getAnalytics = () => {
+  if (!analyticsLoaded) {
+    // Use dynamic import to avoid circular dependency issues
+    import('./utils/analytics').then(module => {
+      analyticsObj = module.analytics;
+      analyticsLoaded = true;
+    }).catch(() => {
+      // Silently fail - analytics is optional
+      analyticsLoaded = true;
+    });
+  }
+  return analyticsObj;
+};
+
+// Create a safe wrapper that defers all calls
+const analytics = {
+  track: (event, properties) => {
+    setTimeout(() => {
+      const a = getAnalytics();
+      if (a) a.track(event, properties);
+    }, 0);
+  },
+  page: (pageName, properties) => {
+    setTimeout(() => {
+      const a = getAnalytics();
+      if (a) a.page(pageName, properties);
+    }, 0);
+  },
+  identify: (userId, traits) => {
+    setTimeout(() => {
+      const a = getAnalytics();
+      if (a) a.identify(userId, traits);
+    }, 0);
+  },
+  reset: () => {
+    setTimeout(() => {
+      const a = getAnalytics();
+      if (a) a.reset();
+    }, 0);
+  },
+};
+
+// Use EVENTS constant
+const EVENTS = EVENTS_CONST;
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);

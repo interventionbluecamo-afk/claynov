@@ -2,7 +2,33 @@ import { useState } from 'react';
 import { Mail, ArrowLeft, Check, AlertCircle } from 'lucide-react';
 import { signUp, signIn } from '../utils/supabaseAuth';
 import { toast } from '../components/Toast';
-import { analytics, EVENTS } from '../utils/analytics';
+// Import EVENTS immediately (just constants, no side effects)
+import { EVENTS } from '../utils/analytics';
+
+// Lazy import analytics to avoid circular dependency
+let analyticsModule = null;
+const getAnalytics = async () => {
+  if (!analyticsModule) {
+    analyticsModule = await import('../utils/analytics');
+  }
+  return analyticsModule;
+};
+
+// Safe wrapper for analytics calls
+const safeAnalyticsCall = async (method, ...args) => {
+  try {
+    const module = await getAnalytics();
+    if (module.analytics && module.analytics[method]) {
+      setTimeout(() => {
+        module.analytics[method](...args);
+      }, 0);
+    }
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn('Analytics error:', error);
+    }
+  }
+};
 
 export default function SignUp({ onSuccess, onBack, user }) {
   const [email, setEmail] = useState('');
@@ -109,14 +135,14 @@ export default function SignUp({ onSuccess, onBack, user }) {
       if (isSignIn) {
         userData = await signIn(trimmedEmail, password);
         toast.success('Welcome back!');
-        analytics.track(EVENTS.SIGNUP_COMPLETED, {
+        safeAnalyticsCall('track', EVENTS.SIGNUP_COMPLETED, {
           method: 'sign_in',
           hasUpgradeIntent: localStorage.getItem('clay_upgrade_after_signup') === 'true',
         });
       } else {
         userData = await signUp(trimmedEmail, password, name.trim());
         toast.success('Account created successfully!');
-        analytics.track(EVENTS.SIGNUP_COMPLETED, {
+        safeAnalyticsCall('track', EVENTS.SIGNUP_COMPLETED, {
           method: 'sign_up',
           hasUpgradeIntent: localStorage.getItem('clay_upgrade_after_signup') === 'true',
         });
@@ -128,7 +154,7 @@ export default function SignUp({ onSuccess, onBack, user }) {
       let errorMsg = err.message || 'Something went wrong. Please try again.';
       
       // Track signup failure
-      analytics.track(EVENTS.SIGNUP_FAILED, {
+      safeAnalyticsCall('track', EVENTS.SIGNUP_FAILED, {
         method: isSignIn ? 'sign_in' : 'sign_up',
         error: errorMsg,
       });

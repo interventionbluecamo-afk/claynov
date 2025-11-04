@@ -1629,7 +1629,15 @@ Requirements:
 
               {/* Regenerate Button */}
               <button
-                onClick={() => handleOptimize()}
+                onClick={() => {
+                  analytics.track(EVENTS.REGENERATE_CLICKED, {
+                    useCount,
+                    isPro,
+                    tone,
+                    hasAccount: !!user,
+                  });
+                  handleOptimize();
+                }}
                 disabled={processing || !resumeText || !jobDesc}
                 className="w-full h-12 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Regenerate resume with current settings"

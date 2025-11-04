@@ -604,20 +604,32 @@ export default function ClayApp() {
         tone,
       });
       
-      if (isNetworkError) {
-        console.warn('Network error - serverless function may not be deployed, falling back to mock API');
-        toast.info('Using demo optimization (backend not configured)');
+      if (isNetworkError || err.message?.includes('404') || err.message?.includes('Not Found')) {
+        // Check if API key is available for direct call in development
+        const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
+        if (isNetworkError && apiKey && import.meta.env.DEV) {
+          console.warn('Serverless function not available, but API key found. To use real API:');
+          console.warn('1. Run: vercel dev (in separate terminal)');
+          console.warn('2. Or deploy to Vercel with CLAUDE_API_KEY env var');
+          console.warn('Falling back to mock API for now...');
+        } else {
+          console.warn('Network error - serverless function may not be deployed, falling back to mock API');
+          toast.info('Using demo optimization (backend not configured)');
+        }
       } else {
         setError(errorMsg);
         toast.error(errorMsg);
-        analytics.track(EVENTS?.ERROR_OCCURRED, {
+        analytics.track(EVENTS?.ERROR_OCCURRED || 'error_occurred', {
           error: errorMsg,
           step: 'optimization',
           useCount,
         });
+        // Don't fallback to mock on real API errors - show the error
+        setProcessing(false);
+        return;
       }
       
-      // Fallback to mock API if serverless function fails (e.g., not deployed yet)
+      // Fallback to mock API only if it's a network/404 error (serverless function not available)
       try {
         const mockResult = await mockOptimizeResume(resumeText, jobDesc, tone);
         setResult({

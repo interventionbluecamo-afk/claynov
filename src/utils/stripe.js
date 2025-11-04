@@ -9,6 +9,8 @@
  * 4. Create a Stripe Checkout Session on your backend
  */
 
+import { analytics, EVENTS } from './analytics';
+
 /**
  * Initiate Stripe Checkout for Pro upgrade
  * 
@@ -91,6 +93,13 @@ export function redirectToStripePayment(userData) {
     localStorage.setItem('clay_pending_upgrade_user_id', userData.id || '');
     localStorage.setItem('clay_pending_upgrade_timestamp', Date.now().toString());
   }
+
+  // Track payment started
+  analytics.track(EVENTS.PAYMENT_STARTED, {
+    userId: userData?.id,
+    email: userData?.email,
+    isPro: userData?.isPro || false,
+  });
 
   // Redirect to Stripe Payment Link
   // Note: Make sure your Stripe Payment Link has a return URL set to your app

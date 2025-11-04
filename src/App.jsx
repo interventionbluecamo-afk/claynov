@@ -1449,7 +1449,16 @@ Requirements:
                           <button
                             key={f.name}
                             onClick={() => {
-                              setFormatting(f.name.toLowerCase());
+                              const newFormat = f.name.toLowerCase();
+                              setFormatting(newFormat);
+                              
+                              // Track format change
+                              analytics.track(EVENTS.FORMAT_CHANGED, {
+                                fromFormat: formatting,
+                                toFormat: newFormat,
+                                isPro,
+                              });
+                              
                               if (resumeText && jobDesc) {
                                 handleToneChange(tone);
                               }

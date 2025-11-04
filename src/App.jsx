@@ -718,17 +718,17 @@ export default function ClayApp() {
         <div className="flex-1 flex flex-col pb-24 max-w-2xl mx-auto w-full px-4">
           <div className="flex-1 flex flex-col justify-center py-8">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-sm font-medium text-green-700 mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-sm font-medium text-green-700 mb-4 animate-fade-in-up animate-delay-100">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 {formatWeeklyCount(weeklyCount)} resumes optimized this week
               </div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight animate-fade-in-up animate-delay-200">
                 Land jobs like never before
               </h1>
-              <p className="text-xl text-gray-600">AI recrafts your resume for each job—boost your chances ✨</p>
+              <p className="text-xl text-gray-600 animate-fade-in-up animate-delay-300">AI recrafts your resume for each job—boost your chances ✨</p>
             </div>
 
-            <div className="w-full max-w-md mx-auto">
+            <div className="w-full max-w-md mx-auto animate-fade-in-up animate-delay-400">
               <input 
                 type="file" 
                 id="upload" 
@@ -742,8 +742,8 @@ export default function ClayApp() {
                   uploading 
                     ? 'border-gray-400 bg-gray-50' 
                     : resumeFile 
-                    ? 'border-gray-900 bg-gray-50' 
-                    : 'border-gray-300 hover:border-gray-400 bg-gradient-to-br from-gray-50 via-white to-gray-50'
+                    ? 'border-gray-900 bg-white' 
+                    : 'border-gray-300 hover:border-gray-400 bg-white'
                 }`}>
                   <div className="flex flex-col items-center gap-6">
                     {uploading ? (
@@ -780,7 +780,7 @@ export default function ClayApp() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 max-w-2xl mx-auto">
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-500">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Zap className="w-5 h-5 text-blue-600" />
@@ -792,7 +792,7 @@ export default function ClayApp() {
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-600">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Shield className="w-5 h-5 text-green-600" />
@@ -804,7 +804,7 @@ export default function ClayApp() {
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-700">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Sparkles className="w-5 h-5 text-purple-600" />
@@ -834,7 +834,7 @@ export default function ClayApp() {
                 </div>
 
                 {/* Feature 2: Job Matching */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up animate-delay-900">
                   <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
                     <Search className="w-7 h-7 text-blue-600" />
                   </div>
@@ -845,7 +845,7 @@ export default function ClayApp() {
                 </div>
 
                 {/* Feature 3: Privacy & Security */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up animate-delay-1000">
                   <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
                     <Shield className="w-7 h-7 text-purple-600" />
                   </div>
@@ -856,7 +856,7 @@ export default function ClayApp() {
                 </div>
 
                 {/* Feature 4: Pro Features Highlight */}
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden animate-fade-in-up animate-delay-1100">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                   <div className="relative">
                     <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">

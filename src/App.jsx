@@ -189,35 +189,47 @@ export default function ClayApp() {
     return () => window.removeEventListener('clay:showSignUp', handleShowSignUp);
   }, []);
 
-  // Track page views
+  // Track page views (defer to avoid initialization issues)
   useEffect(() => {
-    if (showPricing) {
-      analytics.page('Pricing');
-      analytics.track(EVENTS.PRICING_PAGE_VIEWED, {
-        useCount,
-        isPro,
-        hasEmail: !!user?.email,
-      });
-    } else if (showSignUpPage) {
-      analytics.page('SignUp');
-      analytics.track(EVENTS.SIGNUP_STARTED, {
-        source: 'pricing_page',
-      });
-    } else if (showProfile) {
-      analytics.page('Profile');
-      analytics.track(EVENTS.PROFILE_VIEWED);
-    } else if (showTerms) {
-      analytics.page('Terms');
-      analytics.track(EVENTS.TERMS_VIEWED);
-    } else if (showPrivacy) {
-      analytics.page('Privacy');
-      analytics.track(EVENTS.PRIVACY_VIEWED);
-    } else {
-      analytics.page(`Step ${step}`);
-      if (step === 1) {
-        analytics.track(EVENTS.LANDING_PAGE_VIEWED);
+    // Defer analytics calls to ensure module is fully initialized
+    const timer = setTimeout(() => {
+      try {
+        if (showPricing) {
+          analytics.page('Pricing');
+          analytics.track(EVENTS.PRICING_PAGE_VIEWED, {
+            useCount,
+            isPro,
+            hasEmail: !!user?.email,
+          });
+        } else if (showSignUpPage) {
+          analytics.page('SignUp');
+          analytics.track(EVENTS.SIGNUP_STARTED, {
+            source: 'pricing_page',
+          });
+        } else if (showProfile) {
+          analytics.page('Profile');
+          analytics.track(EVENTS.PROFILE_VIEWED);
+        } else if (showTerms) {
+          analytics.page('Terms');
+          analytics.track(EVENTS.TERMS_VIEWED);
+        } else if (showPrivacy) {
+          analytics.page('Privacy');
+          analytics.track(EVENTS.PRIVACY_VIEWED);
+        } else {
+          analytics.page(`Step ${step}`);
+          if (step === 1) {
+            analytics.track(EVENTS.LANDING_PAGE_VIEWED);
+          }
+        }
+      } catch (error) {
+        // Silently fail - don't break the app
+        if (import.meta.env.DEV) {
+          console.warn('Analytics tracking error:', error);
+        }
       }
-    }
+    }, 100); // Small delay to ensure module initialization
+    
+    return () => clearTimeout(timer);
   }, [step, showPricing, showSignUpPage, showProfile, showTerms, showPrivacy, useCount, isPro, user]);
 
   // Track user identification (defer to avoid initialization issues)

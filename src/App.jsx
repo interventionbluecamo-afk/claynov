@@ -148,6 +148,8 @@ export default function ClayApp() {
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [currentTrustSignal, setCurrentTrustSignal] = useState(null);
   const [trustSignalIndex, setTrustSignalIndex] = useState(0);
+  const [isPro, setIsPro] = useState(false);
+  const freeUsesLeft = Math.max(0, 3 - useCount);
 
   // Developer bypass (Ctrl/Cmd + Shift + B)
   useEffect(() => {
@@ -243,17 +245,20 @@ export default function ClayApp() {
         // Payment was initiated less than 24 hours ago
         const timestamp = parseInt(pendingTimestamp, 10);
         const hoursSincePayment = (Date.now() - timestamp) / (1000 * 60 * 60);
+        const pendingUserId = localStorage.getItem('clay_pending_upgrade_user_id');
         
         if (hoursSincePayment < 24) {
           // Show message that payment is being processed
           toast.info('Payment processing... We\'ll upgrade your account shortly!');
           
           // Track payment completion (detected via localStorage flag)
-          analytics.track(EVENTS?.PAYMENT_COMPLETED, {
-            userId: pendingUserId,
-            email: pendingEmail,
-            hoursSincePayment: hoursSincePayment,
-          });
+          loadAnalytics().then(() => {
+            analytics.track(EVENTS?.PAYMENT_COMPLETED || 'payment_completed', {
+              userId: pendingUserId,
+              email: pendingEmail,
+              hoursSincePayment: hoursSincePayment,
+            });
+          }).catch(() => {});
           
           // In production, you would:
           // 1. Check Stripe API for payment status
@@ -380,17 +385,12 @@ export default function ClayApp() {
     }
   }, [useCount, isPro, user]);
 
-  // Initialize isPro from user on mount and update when user changes
-  useEffect(() => {
-    if (user) {
-      setIsPro(user.isPro || false);
-    }
-  }, [user]);
-
   // Update isPro when user changes, and reset use count if upgraded
   useEffect(() => {
     const wasPro = isPro;
     const nowPro = user?.isPro || false;
+    
+    // Update isPro state
     if (wasPro !== nowPro) {
       setIsPro(nowPro);
     }
@@ -404,7 +404,7 @@ export default function ClayApp() {
         console.error('Error resetting use count after upgrade:', error);
       });
     }
-  }, [user]);
+  }, [user, isPro]);
 
   const handleFileUpload = useCallback(async (e) => {
     const file = e.target.files[0];

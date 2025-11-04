@@ -779,20 +779,8 @@ export default function ClayApp() {
               </label>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12 max-w-xl mx-auto">
               <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-500">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">Instant results</div>
-                    <div className="text-xs text-gray-500">Optimized in seconds</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-600">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Shield className="w-5 h-5 text-green-600" />
@@ -804,7 +792,7 @@ export default function ClayApp() {
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-700">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm animate-fade-in-up animate-delay-600">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Sparkles className="w-5 h-5 text-purple-600" />
@@ -844,19 +832,8 @@ export default function ClayApp() {
                   </p>
                 </div>
 
-                {/* Feature 3: Privacy & Security */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up animate-delay-1000">
-                  <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
-                    <Shield className="w-7 h-7 text-purple-600" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">100% Private</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Your resume stays on your device. We never store your personal information or resume content.
-                  </p>
-                </div>
-
-                {/* Feature 4: Pro Features Highlight */}
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden animate-fade-in-up animate-delay-1100">
+                {/* Feature 3: Pro Features Highlight */}
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden animate-fade-in-up animate-delay-1000">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                   <div className="relative">
                     <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">

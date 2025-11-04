@@ -283,10 +283,8 @@ export default function ClayApp() {
     window.clayTrustSignalInterval = signalInterval;
 
     try {
-      const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
-      const optimizationResult = apiKey 
-        ? await optimizeResumeApi(resumeText, jobDesc, tone)
-        : await mockOptimizeResume(resumeText, jobDesc, tone);
+      // Always use serverless function - API key is secure on server
+      const optimizationResult = await optimizeResumeApi(resumeText, jobDesc, tone);
       
       if (!optimizationResult.success) {
         throw new Error('Optimization failed. Please try again.');
@@ -329,22 +327,21 @@ export default function ClayApp() {
       createConfetti();
       toast.success('Resume optimized successfully! 🎉');
     } catch (err) {
-      // Handle CORS errors - Anthropic API can't be called from browser
-      const isCorsError = err.message?.includes('CORS_BLOCKED') || err.message?.includes('Failed to fetch');
-      const errorMsg = err.message.includes('API key')
-        ? 'Claude API not configured. Using mock data for demo.'
-        : isCorsError
-        ? 'AI optimization requires a backend server. Using demo data for now.'
+      // Handle network/API errors - fallback to mock if serverless function unavailable
+      const isNetworkError = err.message?.includes('Failed to fetch') || err.message?.includes('CORS_BLOCKED') || err.name === 'TypeError';
+      const errorMsg = isNetworkError
+        ? 'Backend server unavailable. Using demo optimization.'
         : err.message || 'Failed to optimize resume. Please try again.';
       
-      if (isCorsError) {
-        console.warn('CORS error detected - falling back to mock API');
-        toast.info('Using demo optimization (AI requires backend setup)');
+      if (isNetworkError) {
+        console.warn('Network error - serverless function may not be deployed, falling back to mock API');
+        toast.info('Using demo optimization (backend not configured)');
       } else {
         setError(errorMsg);
         toast.error(errorMsg);
       }
       
+      // Fallback to mock API if serverless function fails (e.g., not deployed yet)
       try {
         const mockResult = await mockOptimizeResume(resumeText, jobDesc, tone);
         setResult({
@@ -477,10 +474,8 @@ export default function ClayApp() {
     setError(null);
 
     try {
-      const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
-      const optimizationResult = apiKey
-        ? await optimizeResumeApi(resumeText, jobDesc, newTone)
-        : await mockOptimizeResume(resumeText, jobDesc, newTone);
+      // Always use serverless function - API key is secure on server
+      const optimizationResult = await optimizeResumeApi(resumeText, jobDesc, newTone);
         
       if (optimizationResult.success) {
         setResult(prev => ({

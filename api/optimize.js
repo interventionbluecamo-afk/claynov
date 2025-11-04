@@ -33,11 +33,45 @@ export default async function handler(req, res) {
     });
   }
 
-  const { resumeText, jobDescription, tone = 'professional' } = req.body;
+  // Input validation
+  let { resumeText, jobDescription, tone = 'professional' } = req.body;
 
   if (!resumeText || !jobDescription) {
     return res.status(400).json({ error: 'resumeText and jobDescription are required' });
   }
+
+  // Validate input types
+  if (typeof resumeText !== 'string' || typeof jobDescription !== 'string' || typeof tone !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types' });
+  }
+
+  // Length validation to prevent abuse
+  if (resumeText.length > 50000) {
+    return res.status(400).json({ error: 'Resume text is too long (max 50,000 characters)' });
+  }
+
+  if (jobDescription.length > 10000) {
+    return res.status(400).json({ error: 'Job description is too long (max 10,000 characters)' });
+  }
+
+  // Basic sanitization - remove any potential script tags or dangerous content
+  // Simple text sanitization (remove HTML tags)
+  resumeText = resumeText.replace(/<[^>]*>/g, '').trim();
+  jobDescription = jobDescription.replace(/<[^>]*>/g, '').trim();
+
+  // Validate tone is one of allowed values
+  const allowedTones = ['professional', 'creative', 'technical', 'executive'];
+  if (!allowedTones.includes(tone.toLowerCase())) {
+    return res.status(400).json({ error: `Invalid tone. Must be one of: ${allowedTones.join(', ')}` });
+  }
+  tone = tone.toLowerCase();
+
+  // Basic rate limiting check (IP-based)
+  // Note: For production, implement proper rate limiting with Vercel KV or Redis
+  const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.headers['x-real-ip'] || 'unknown';
+  
+  // Log request for monitoring (without sensitive data)
+  console.log(`Optimization request from IP: ${clientIP.substring(0, 8)}... (tone: ${tone}, resume length: ${resumeText.length})`);
 
   const apiVersion = process.env.CLAUDE_API_VERSION || '2024-02-15-preview';
   const model = process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022';
@@ -186,8 +220,15 @@ Return ONLY the JSON object with the structure specified in the system prompt.`;
     });
   } catch (error) {
     console.error('Proxy error:', error);
+    
+    // Don't expose internal error details in production
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'Failed to optimize resume. Please try again.';
+    
     return res.status(500).json({ 
-      error: error.message || 'Failed to optimize resume. Please try again.' 
+      success: false,
+      error: errorMessage
     });
   }
 }

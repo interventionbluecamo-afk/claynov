@@ -190,16 +190,22 @@ async function getUserProfile(userId) {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() instead of single() to handle null results gracefully
 
     if (error) {
-      console.error('Error fetching profile:', error);
+      // Only log non-critical errors (don't spam console for RLS policy issues)
+      if (error.code !== 'PGRST116' && error.code !== 'PGRST301') { // Not found errors are OK
+        console.warn('Error fetching profile:', error.message || error);
+      }
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Error fetching profile:', error);
+    // Silently handle errors - profile might not exist yet
+    if (import.meta.env.DEV) {
+      console.warn('Error fetching profile:', error.message || error);
+    }
     return null;
   }
 }
@@ -221,12 +227,22 @@ export async function updateUserProfile(userId, updates) {
       })
       .eq('id', userId)
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle() for better error handling
 
-    if (error) throw error;
+    if (error) {
+      // Only log non-critical errors
+      if (error.code !== 'PGRST116' && error.code !== 'PGRST301') {
+        console.warn('Error updating profile:', error.message || error);
+      }
+      return null;
+    }
+    
     return data;
   } catch (error) {
-    console.error('Error updating profile:', error);
+    // Silently handle errors - profile might have RLS restrictions
+    if (import.meta.env.DEV) {
+      console.warn('Error updating profile:', error.message || error);
+    }
     return null;
   }
 }

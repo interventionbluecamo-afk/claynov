@@ -7,7 +7,9 @@
 export async function optimizeResume(resumeText, jobDescription, tone = 'professional') {
   // Use serverless function proxy instead of direct API call
   // This avoids CORS issues and keeps the API key secure on the server
-  const apiUrl = import.meta.env.VITE_API_URL || '/api/optimize';
+  // In development, try local API route; in production, use Vercel's /api/optimize
+  const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
+  const apiUrl = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3000/api/optimize' : '/api/optimize');
 
   try {
     // Call our Vercel serverless function proxy

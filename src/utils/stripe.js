@@ -95,16 +95,21 @@ export function redirectToStripePayment(userData) {
   }
 
   // Track payment started (safely - don't block redirect if analytics fails)
-  try {
-    analytics.track(EVENTS.PAYMENT_STARTED, {
-      userId: userData?.id,
-      email: userData?.email,
-      isPro: userData?.isPro || false,
-    });
-  } catch (error) {
-    // Don't block payment redirect if analytics fails
-    console.warn('Analytics error (non-blocking):', error);
-  }
+  // Use setTimeout to defer and avoid blocking redirect
+  setTimeout(() => {
+    try {
+      analytics.track(EVENTS.PAYMENT_STARTED, {
+        userId: userData?.id,
+        email: userData?.email,
+        isPro: userData?.isPro || false,
+      });
+    } catch (error) {
+      // Don't block payment redirect if analytics fails
+      if (import.meta.env.DEV) {
+        console.warn('Analytics error (non-blocking):', error);
+      }
+    }
+  }, 0);
 
   // Redirect to Stripe Payment Link
   // Note: Make sure your Stripe Payment Link has a return URL set to your app

@@ -220,25 +220,35 @@ export default function ClayApp() {
     }
   }, [step, showPricing, showSignUpPage, showProfile, showTerms, showPrivacy, useCount, isPro, user]);
 
-  // Track user identification
+  // Track user identification (defer to avoid initialization issues)
   useEffect(() => {
     if (user?.id) {
-      analytics.identify(user.id, {
-        email: user.email,
-        isPro: user.isPro || false,
-        name: user.name,
-        signupDate: user.created_at,
-        useCount: useCount,
-      });
+      const timer = setTimeout(() => {
+        try {
+          analytics.identify(user.id, {
+            email: user.email,
+            isPro: user.isPro || false,
+            name: user.name,
+            signupDate: user.created_at,
+            useCount: useCount,
+          });
+          
+          // Track returning user
+          const lastVisit = localStorage.getItem(`clay_last_visit_${user.id}`);
+          if (lastVisit) {
+            analytics.track(EVENTS.RETURNING_USER, {
+              daysSinceLastVisit: Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24)),
+            });
+          }
+          localStorage.setItem(`clay_last_visit_${user.id}`, Date.now().toString());
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.warn('Analytics identify error:', error);
+          }
+        }
+      }, 0);
       
-      // Track returning user
-      const lastVisit = localStorage.getItem(`clay_last_visit_${user.id}`);
-      if (lastVisit) {
-        analytics.track(EVENTS.RETURNING_USER, {
-          daysSinceLastVisit: Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24)),
-        });
-      }
-      localStorage.setItem(`clay_last_visit_${user.id}`, Date.now().toString());
+      return () => clearTimeout(timer);
     }
   }, [user, useCount]);
 

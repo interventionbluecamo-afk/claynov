@@ -60,8 +60,8 @@ export const EVENTS = {
   PRIVACY_VIEWED: 'privacy_viewed',
 };
 
-// Safe wrapper to check if PostHog is available
-const isPostHogReady = () => {
+// Safe wrapper to check if PostHog is available (function declaration for hoisting)
+function isPostHogReady() {
   try {
     return typeof window !== 'undefined' && 
            window.posthog && 
@@ -69,6 +69,15 @@ const isPostHogReady = () => {
   } catch {
     return false;
   }
+}
+
+// Lazy initialization flag
+let analyticsInitialized = false;
+
+// Initialize analytics after a short delay to avoid initialization issues
+const ensureAnalyticsReady = () => {
+  if (analyticsInitialized) return;
+  analyticsInitialized = true;
 };
 
 export const analytics = {
@@ -78,15 +87,43 @@ export const analytics = {
    * @param {object} properties - Additional event properties
    */
   track: (event, properties = {}) => {
+    // Defer execution to next tick to avoid initialization issues
+    if (typeof window === 'undefined') return;
+    
     try {
-      // PostHog tracking (if available and ready)
-      if (isPostHogReady()) {
-        window.posthog.capture(event, properties);
-      }
-
-      // Console logging in development (always helpful for debugging)
-      if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
-        console.log('📊 Analytics:', event, properties);
+      // Use requestIdleCallback or setTimeout for non-blocking execution
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => {
+          try {
+            ensureAnalyticsReady();
+            if (isPostHogReady()) {
+              window.posthog.capture(event, properties);
+            }
+            if (import.meta.env.DEV) {
+              console.log('📊 Analytics:', event, properties);
+            }
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.warn('Analytics error:', err);
+            }
+          }
+        }, { timeout: 100 });
+      } else {
+        setTimeout(() => {
+          try {
+            ensureAnalyticsReady();
+            if (isPostHogReady()) {
+              window.posthog.capture(event, properties);
+            }
+            if (import.meta.env.DEV) {
+              console.log('📊 Analytics:', event, properties);
+            }
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.warn('Analytics error:', err);
+            }
+          }
+        }, 0);
       }
     } catch (error) {
       // Silently fail - don't break the app if analytics fails
@@ -102,20 +139,25 @@ export const analytics = {
    * @param {object} traits - User traits (email, isPro, etc.)
    */
   identify: (userId, traits = {}) => {
-    try {
-      if (isPostHogReady() && typeof window.posthog.identify === 'function') {
-        window.posthog.identify(userId, traits);
-        
+    if (typeof window === 'undefined') return;
+    
+    setTimeout(() => {
+      try {
+        ensureAnalyticsReady();
+        if (isPostHogReady() && typeof window.posthog.identify === 'function') {
+          window.posthog.identify(userId, traits);
+          
+          if (import.meta.env.DEV) {
+            console.log('👤 Analytics Identify:', userId, traits);
+          }
+        }
+      } catch (error) {
+        // Silently fail - don't break the app if analytics fails
         if (import.meta.env.DEV) {
-          console.log('👤 Analytics Identify:', userId, traits);
+          console.warn('Analytics identify error:', error);
         }
       }
-    } catch (error) {
-      // Silently fail - don't break the app if analytics fails
-      if (import.meta.env.DEV) {
-        console.warn('Analytics identify error:', error);
-      }
-    }
+    }, 0);
   },
 
   /**
@@ -124,43 +166,53 @@ export const analytics = {
    * @param {object} properties - Additional properties
    */
   page: (pageName, properties = {}) => {
-    try {
-      if (isPostHogReady()) {
-        window.posthog.capture('$pageview', { 
-          page: pageName,
-          ...properties 
-        });
-      }
+    if (typeof window === 'undefined') return;
+    
+    setTimeout(() => {
+      try {
+        ensureAnalyticsReady();
+        if (isPostHogReady()) {
+          window.posthog.capture('$pageview', { 
+            page: pageName,
+            ...properties 
+          });
+        }
 
-      if (import.meta.env.DEV) {
-        console.log('📄 Page View:', pageName, properties);
+        if (import.meta.env.DEV) {
+          console.log('📄 Page View:', pageName, properties);
+        }
+      } catch (error) {
+        // Silently fail - don't break the app if analytics fails
+        if (import.meta.env.DEV) {
+          console.warn('Analytics page tracking error:', error);
+        }
       }
-    } catch (error) {
-      // Silently fail - don't break the app if analytics fails
-      if (import.meta.env.DEV) {
-        console.warn('Analytics page tracking error:', error);
-      }
-    }
+    }, 0);
   },
 
   /**
    * Reset user identification (on logout)
    */
   reset: () => {
-    try {
-      if (isPostHogReady() && typeof window.posthog.reset === 'function') {
-        window.posthog.reset();
-        
+    if (typeof window === 'undefined') return;
+    
+    setTimeout(() => {
+      try {
+        ensureAnalyticsReady();
+        if (isPostHogReady() && typeof window.posthog.reset === 'function') {
+          window.posthog.reset();
+          
+          if (import.meta.env.DEV) {
+            console.log('🔄 Analytics Reset');
+          }
+        }
+      } catch (error) {
+        // Silently fail - don't break the app if analytics fails
         if (import.meta.env.DEV) {
-          console.log('🔄 Analytics Reset');
+          console.warn('Analytics reset error:', error);
         }
       }
-    } catch (error) {
-      // Silently fail - don't break the app if analytics fails
-      if (import.meta.env.DEV) {
-        console.warn('Analytics reset error:', error);
-      }
-    }
+    }, 0);
   },
 };
 

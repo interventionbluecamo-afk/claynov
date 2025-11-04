@@ -17,57 +17,108 @@ import { getRandomTrustSignal, getTrustSignals } from './utils/trustSignals';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer, toast } from './components/Toast';
 import StepProgress from './components/StepProgress';
-// Import EVENTS immediately (just constants, no side effects)
-import { EVENTS as EVENTS_CONST, getFileInfo, getTextInfo } from './utils/analytics';
+// Completely remove analytics from initial bundle to avoid initialization errors
+// All analytics calls will be lazy-loaded and optional
+let analyticsModule = null;
+let EVENTS = null;
+let getFileInfo = null;
+let getTextInfo = null;
 
-// Lazy load analytics object to avoid initialization issues
-let analyticsLoaded = false;
-let analyticsObj = null;
-
-const getAnalytics = () => {
-  if (!analyticsLoaded) {
-    // Use dynamic import to avoid circular dependency issues
-    import('./utils/analytics').then(module => {
-      analyticsObj = module.analytics;
-      analyticsLoaded = true;
-    }).catch(() => {
-      // Silently fail - analytics is optional
-      analyticsLoaded = true;
-    });
+const loadAnalytics = async () => {
+  if (!analyticsModule) {
+    try {
+      analyticsModule = await import('./utils/analytics');
+      EVENTS = analyticsModule.EVENTS;
+      getFileInfo = analyticsModule.getFileInfo;
+      getTextInfo = analyticsModule.getTextInfo;
+    } catch (error) {
+      console.warn('Failed to load analytics:', error);
+      // Create fallback EVENTS object
+      EVENTS = {
+        PAGE_VIEW: 'page_viewed',
+        LANDING_PAGE_VIEW: 'landing_page_viewed',
+        RESUME_UPLOADED: 'resume_uploaded',
+        OPTIMIZATION_STARTED: 'optimization_started',
+        OPTIMIZATION_COMPLETED: 'optimization_completed',
+        OPTIMIZATION_FAILED: 'optimization_failed',
+        RESUME_DOWNLOADED: 'resume_downloaded',
+        TONE_CHANGED: 'tone_changed',
+        FORMAT_CHANGED: 'format_changed',
+        SECTION_EXPANDED: 'section_expanded',
+        INTERVIEW_QUESTIONS_GENERATED: 'interview_questions_generated',
+        REGENERATE_CLICKED: 'regenerate_clicked',
+        SIGNUP_STARTED: 'signup_started',
+        SIGNUP_COMPLETED: 'signup_completed',
+        SIGNUP_FAILED: 'signup_failed',
+        UPGRADE_CLICKED: 'upgrade_clicked',
+        PRICING_PAGE_VIEWED: 'pricing_page_viewed',
+        PAYMENT_STARTED: 'payment_started',
+        PAYMENT_COMPLETED: 'payment_completed',
+        NEW_OPTIMIZATION_STARTED: 'new_optimization_started',
+        RETURNING_USER: 'returning_user',
+        ERROR_OCCURRED: 'error_occurred',
+        LIMIT_REACHED: 'free_limit_reached',
+        PROFILE_VIEWED: 'profile_viewed',
+        TERMS_VIEWED: 'terms_viewed',
+        PRIVACY_VIEWED: 'privacy_viewed',
+      };
+      getFileInfo = () => ({});
+      getTextInfo = () => ({ length: 0, wordCount: 0 });
+    }
   }
-  return analyticsObj;
+  return analyticsModule;
 };
 
 // Create a safe wrapper that defers all calls
 const analytics = {
   track: (event, properties) => {
     setTimeout(() => {
-      const a = getAnalytics();
-      if (a) a.track(event, properties);
-    }, 0);
+      loadAnalytics().then(module => {
+        if (module?.analytics) {
+          module.analytics.track(event, properties);
+        }
+      }).catch(() => {});
+    }, 100);
   },
   page: (pageName, properties) => {
     setTimeout(() => {
-      const a = getAnalytics();
-      if (a) a.page(pageName, properties);
-    }, 0);
+      loadAnalytics().then(module => {
+        if (module?.analytics) {
+          module.analytics.page(pageName, properties);
+        }
+      }).catch(() => {});
+    }, 100);
   },
   identify: (userId, traits) => {
     setTimeout(() => {
-      const a = getAnalytics();
-      if (a) a.identify(userId, traits);
-    }, 0);
+      loadAnalytics().then(module => {
+        if (module?.analytics) {
+          module.analytics.identify(userId, traits);
+        }
+      }).catch(() => {});
+    }, 100);
   },
   reset: () => {
     setTimeout(() => {
-      const a = getAnalytics();
-      if (a) a.reset();
-    }, 0);
+      loadAnalytics().then(module => {
+        if (module?.analytics) {
+          module.analytics.reset();
+        }
+      }).catch(() => {});
+    }, 100);
   },
 };
 
-// Use EVENTS constant
-const EVENTS = EVENTS_CONST;
+// Helper functions that will be populated after load
+const safeGetFileInfo = (file) => {
+  if (getFileInfo) return getFileInfo(file);
+  return { fileType: file?.name?.split('.').pop(), fileSize: file?.size, fileName: 'file' };
+};
+
+const safeGetTextInfo = (text) => {
+  if (getTextInfo) return getTextInfo(text);
+  return { length: text?.length || 0, wordCount: text?.split(/\s+/).length || 0 };
+};
 
 export default function ClayApp() {
   const [step, setStep] = useState(1);
@@ -198,7 +249,7 @@ export default function ClayApp() {
           toast.info('Payment processing... We\'ll upgrade your account shortly!');
           
           // Track payment completion (detected via localStorage flag)
-          analytics.track(EVENTS.PAYMENT_COMPLETED, {
+          analytics.track(EVENTS?.PAYMENT_COMPLETED, {
             userId: pendingUserId,
             email: pendingEmail,
             hoursSincePayment: hoursSincePayment,
@@ -246,29 +297,29 @@ export default function ClayApp() {
       try {
         if (showPricing) {
           analytics.page('Pricing');
-          analytics.track(EVENTS.PRICING_PAGE_VIEWED, {
+          analytics.track(EVENTS?.PRICING_PAGE_VIEWED, {
             useCount,
             isPro,
             hasEmail: !!user?.email,
           });
         } else if (showSignUpPage) {
           analytics.page('SignUp');
-          analytics.track(EVENTS.SIGNUP_STARTED, {
+          analytics.track(EVENTS?.SIGNUP_STARTED, {
             source: 'pricing_page',
           });
         } else if (showProfile) {
           analytics.page('Profile');
-          analytics.track(EVENTS.PROFILE_VIEWED);
+          analytics.track(EVENTS?.PROFILE_VIEWED);
         } else if (showTerms) {
           analytics.page('Terms');
-          analytics.track(EVENTS.TERMS_VIEWED);
+          analytics.track(EVENTS?.TERMS_VIEWED);
         } else if (showPrivacy) {
           analytics.page('Privacy');
-          analytics.track(EVENTS.PRIVACY_VIEWED);
+          analytics.track(EVENTS?.PRIVACY_VIEWED);
         } else {
           analytics.page(`Step ${step}`);
           if (step === 1) {
-            analytics.track(EVENTS.LANDING_PAGE_VIEWED);
+            analytics.track(EVENTS?.LANDING_PAGE_VIEWED);
           }
         }
       } catch (error) {
@@ -286,29 +337,31 @@ export default function ClayApp() {
   useEffect(() => {
     if (user?.id) {
       const timer = setTimeout(() => {
-        try {
-          analytics.identify(user.id, {
-            email: user.email,
-            isPro: user.isPro || false,
-            name: user.name,
-            signupDate: user.created_at,
-            useCount: useCount,
-          });
-          
-          // Track returning user
-          const lastVisit = localStorage.getItem(`clay_last_visit_${user.id}`);
-          if (lastVisit) {
-            analytics.track(EVENTS.RETURNING_USER, {
-              daysSinceLastVisit: Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24)),
+        loadAnalytics().then(() => {
+          try {
+            analytics.identify(user.id, {
+              email: user.email,
+              isPro: user.isPro || false,
+              name: user.name,
+              signupDate: user.created_at,
+              useCount: useCount,
             });
+            
+            // Track returning user
+            const lastVisit = localStorage.getItem(`clay_last_visit_${user.id}`);
+            if (lastVisit) {
+              analytics.track(EVENTS?.RETURNING_USER || 'returning_user', {
+                daysSinceLastVisit: Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24)),
+              });
+            }
+            localStorage.setItem(`clay_last_visit_${user.id}`, Date.now().toString());
+          } catch (error) {
+            if (import.meta.env.DEV) {
+              console.warn('Analytics identify error:', error);
+            }
           }
-          localStorage.setItem(`clay_last_visit_${user.id}`, Date.now().toString());
-        } catch (error) {
-          if (import.meta.env.DEV) {
-            console.warn('Analytics identify error:', error);
-          }
-        }
-      }, 0);
+        }).catch(() => {});
+      }, 100);
       
       return () => clearTimeout(timer);
     }
@@ -317,11 +370,13 @@ export default function ClayApp() {
   // Track limit reached
   useEffect(() => {
     if (!isPro && useCount >= 3) {
-      analytics.track(EVENTS.LIMIT_REACHED, {
-        useCount,
-        hasEmail: !!user?.email,
-        hasAccount: !!user,
-      });
+      loadAnalytics().then(() => {
+        analytics.track(EVENTS?.LIMIT_REACHED || 'free_limit_reached', {
+          useCount,
+          hasEmail: !!user?.email,
+          hasAccount: !!user,
+        });
+      }).catch(() => {});
     }
   }, [useCount, isPro, user]);
 
@@ -356,7 +411,7 @@ export default function ClayApp() {
       const errorMsg = 'Please upload a PDF, DOC, or DOCX file.';
       setError(errorMsg);
       toast.error(errorMsg);
-      analytics.track(EVENTS.ERROR_OCCURRED, {
+      analytics.track(EVENTS?.ERROR_OCCURRED || 'error_occurred', {
         error: 'Invalid file type',
         step: 'upload',
       });
@@ -367,7 +422,7 @@ export default function ClayApp() {
       const errorMsg = 'File size must be less than 5MB. Please compress your file.';
       setError(errorMsg);
       toast.error(errorMsg);
-      analytics.track(EVENTS.ERROR_OCCURRED, {
+      analytics.track(EVENTS?.ERROR_OCCURRED || 'error_occurred', {
         error: 'File too large',
         step: 'upload',
         fileSize: file.size,
@@ -375,13 +430,14 @@ export default function ClayApp() {
       return;
     }
 
-    // Track file upload
-    const fileInfo = getFileInfo(file);
-    analytics.track(EVENTS.RESUME_UPLOADED, {
-      ...fileInfo,
-      isPro,
-      hasAccount: !!user,
-    });
+    // Track file upload (lazy load analytics)
+    loadAnalytics().then(() => {
+      analytics.track(EVENTS?.RESUME_UPLOADED || 'resume_uploaded', {
+        ...safeGetFileInfo(file),
+        isPro,
+        hasAccount: !!user,
+      });
+    }).catch(() => {});
 
     setResumeFile(file);
     setError(null);
@@ -398,7 +454,7 @@ export default function ClayApp() {
       setError(errorMsg);
       toast.error(errorMsg);
       setResumeFile(null);
-      analytics.track(EVENTS.ERROR_OCCURRED, {
+      analytics.track(EVENTS?.ERROR_OCCURRED, {
         error: errorMsg,
         step: 'file_parsing',
         ...fileInfo,
@@ -419,7 +475,7 @@ export default function ClayApp() {
     // Check free uses limit
     if (!isPro && useCount >= 3) {
       // Show upgrade modal with better messaging
-      analytics.track(EVENTS.UPGRADE_MODAL_VIEWED, {
+      analytics.track(EVENTS?.UPGRADE_MODAL_VIEWED, {
         trigger: 'limit_reached',
         useCount,
         hasEmail: !!user?.email,
@@ -435,10 +491,11 @@ export default function ClayApp() {
       }
     }
 
-    // Track optimization started
-    const resumeInfo = getTextInfo(resumeText);
-    const jobDescInfo = getTextInfo(jobDesc);
-    analytics.track(EVENTS.OPTIMIZATION_STARTED, {
+    // Track optimization started (lazy load analytics)
+    const resumeInfo = safeGetTextInfo(resumeText);
+    const jobDescInfo = safeGetTextInfo(jobDesc);
+    loadAnalytics().then(() => {
+      analytics.track(EVENTS?.OPTIMIZATION_STARTED || 'optimization_started', {
       useCount,
       isPro,
       tone,
@@ -515,7 +572,7 @@ export default function ClayApp() {
       toast.success('Resume optimized successfully! 🎉');
       
       // Track successful optimization
-      analytics.track(EVENTS.OPTIMIZATION_COMPLETED, {
+      analytics.track(EVENTS?.OPTIMIZATION_COMPLETED || 'optimization_completed', {
         useCount: useCount + 1,
         isPro,
         tone,
@@ -532,7 +589,7 @@ export default function ClayApp() {
         : err.message || 'Failed to optimize resume. Please try again.';
       
       // Track optimization failure
-      analytics.track(EVENTS.OPTIMIZATION_FAILED, {
+      analytics.track(EVENTS?.OPTIMIZATION_FAILED || 'optimization_failed', {
         error: errorMsg,
         isNetworkError,
         useCount,
@@ -546,7 +603,7 @@ export default function ClayApp() {
       } else {
         setError(errorMsg);
         toast.error(errorMsg);
-        analytics.track(EVENTS.ERROR_OCCURRED, {
+        analytics.track(EVENTS?.ERROR_OCCURRED, {
           error: errorMsg,
           step: 'optimization',
           useCount,
@@ -566,7 +623,7 @@ export default function ClayApp() {
         });
         
         // Track mock API usage (fallback)
-        analytics.track(EVENTS.OPTIMIZATION_COMPLETED, {
+        analytics.track(EVENTS?.OPTIMIZATION_COMPLETED, {
           useCount: useCount + 1,
           isPro,
           tone,
@@ -618,7 +675,7 @@ export default function ClayApp() {
     if (!result?.optimizedText) {
       const errorMsg = 'No optimized resume available to download.';
       setError(errorMsg);
-      analytics.track(EVENTS.ERROR_OCCURRED, {
+      analytics.track(EVENTS?.ERROR_OCCURRED, {
         error: errorMsg,
         step: 'download',
       });
@@ -633,7 +690,7 @@ export default function ClayApp() {
       downloadBlob(blob, filename);
       
       // Track download
-      analytics.track(EVENTS.RESUME_DOWNLOADED, {
+      analytics.track(EVENTS?.RESUME_DOWNLOADED, {
         isPro,
         useCount,
         atsScore: result.ats,
@@ -644,7 +701,7 @@ export default function ClayApp() {
     } catch (err) {
       const errorMsg = 'Failed to generate download. Please try again.';
       setError(errorMsg);
-      analytics.track(EVENTS.ERROR_OCCURRED, {
+      analytics.track(EVENTS?.ERROR_OCCURRED, {
         error: errorMsg,
         step: 'download',
       });
@@ -653,7 +710,7 @@ export default function ClayApp() {
 
   const handleReset = useCallback(() => {
     // Track new optimization started
-    analytics.track(EVENTS.NEW_OPTIMIZATION_STARTED, {
+    analytics.track(EVENTS?.NEW_OPTIMIZATION_STARTED, {
       previousUseCount: useCount,
       isPro,
       hasAccount: !!user,
@@ -679,7 +736,7 @@ export default function ClayApp() {
     }
     
     // Track interview questions generation
-    analytics.track(EVENTS.INTERVIEW_QUESTIONS_GENERATED, {
+    analytics.track(EVENTS?.INTERVIEW_QUESTIONS_GENERATED, {
       isPro,
       useCount,
       hasAccount: !!user,
@@ -718,7 +775,7 @@ export default function ClayApp() {
     
     // Track section expansion/collapse
     if (isExpanding) {
-      analytics.track(EVENTS.SECTION_EXPANDED, {
+      analytics.track(EVENTS?.SECTION_EXPANDED, {
         section,
         isPro,
       });
@@ -769,7 +826,7 @@ export default function ClayApp() {
 
   const handleUpgrade = useCallback(async () => {
     // Track upgrade click
-    analytics.track(EVENTS.UPGRADE_CLICKED, {
+    analytics.track(EVENTS?.UPGRADE_CLICKED, {
       trigger: 'upgrade_button',
       useCount,
       hasAccount: !!user,
@@ -1525,7 +1582,7 @@ Requirements:
                               setFormatting(newFormat);
                               
                               // Track format change
-                              analytics.track(EVENTS.FORMAT_CHANGED, {
+                              analytics.track(EVENTS?.FORMAT_CHANGED, {
                                 fromFormat: formatting,
                                 toFormat: newFormat,
                                 isPro,
@@ -1702,7 +1759,7 @@ Requirements:
               {/* Regenerate Button */}
               <button
                 onClick={() => {
-                  analytics.track(EVENTS.REGENERATE_CLICKED, {
+                  analytics.track(EVENTS?.REGENERATE_CLICKED, {
                     useCount,
                     isPro,
                     tone,

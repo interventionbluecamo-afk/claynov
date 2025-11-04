@@ -1,4 +1,4 @@
-# Stripe Payment Setup - Quick Guide
+k# Stripe Payment Setup - Quick Guide
 
 ## ✅ Payment Link Configured
 
